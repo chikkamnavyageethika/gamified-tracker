@@ -1,0 +1,8 @@
+cat > /Users/apple/Downloads/navvu-electron/.gitignore << 'EOF'
+node_modules/
+dist/
+.DS_Store
+*.dmg
+*.blockmap
+builder-effective-config.yaml
+EOF

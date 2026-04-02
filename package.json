@@ -1,0 +1,46 @@
+{
+  "name": "gamified-tracker",
+  "version": "1.0.0",
+  "author": "Navvu",
+  "description": "Gamified Tracker - 90-Day Productivity Tracker",
+  "main": "main.js",
+  "homepage": "./",
+  "scripts": {
+    "start": "electron . --disable-gpu --disable-software-rasterizer",
+    "build": "electron-builder",
+    "build-mac": "electron-builder --mac"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "30.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.gamified.tracker",
+    "productName": "Gamified Tracker",
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*"
+    ],
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.productivity"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150,
+          "type": "file"
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  }
+}

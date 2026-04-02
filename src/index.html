@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Navvu's To Do List v4 — 90-Day Productivity Tracker with Notion Sync">
+<title>Navvu's To Do List</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="storage-adapter.js"></script>
+<style>
+:root{--bg:#fef6f1;--bg2:#fff8f3;--card:#ffffff;--card2:#fff0e8;--pink:#f7a4b8;--orange:#f5b78e;--yellow:#f7d794;--green:#7ec8a0;--blue:#7eb8d8;--purple:#b8a0d8;--red:#e88090;--t1:#4a3a3a;--t2:#7a6565;--t3:#a89090;--bdr:#f0d8cc;--glow:0 2px 12px rgba(247,164,184,.15);--r:16px;--rs:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-orbs .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;animation:orbF 20s ease-in-out infinite}
+.bg-orbs .orb:nth-child(1){width:400px;height:400px;background:var(--purple);top:-100px;left:-100px}
+.bg-orbs .orb:nth-child(2){width:350px;height:350px;background:var(--pink);bottom:-80px;right:-80px;animation-delay:-7s}
+.bg-orbs .orb:nth-child(3){width:300px;height:300px;background:var(--blue);top:50%;left:50%;animation-delay:-14s}
+@keyframes orbF{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.1)}66%{transform:translate(-30px,40px) scale(.9)}}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:320px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
+.top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;background:var(--bg2);border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:12px}
+.top-l{display:flex;align-items:center;gap:16px}
+.logo{font-family:'Fredoka',sans-serif;font-size:1.5rem;font-weight:700;background:linear-gradient(135deg,var(--pink),var(--orange),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.badge{background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:6px 16px;font-weight:700;font-size:.85rem;color:var(--blue)}
+.top-c{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:6px 16px;font-weight:700;font-size:.9rem}
+.pill .i{font-size:1.1rem}.pill.pts .v{color:var(--yellow)}.pill.str .v{color:var(--orange)}.pill.cmp .v{color:var(--green)}
+.top-r{display:flex;align-items:center;gap:12px}
+.ring{position:relative;width:48px;height:48px}
+.ring svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--bdr);stroke-width:4}
+.ring-f{fill:none;stroke:var(--purple);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+.ring-t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:var(--purple)}
+.btn-i{width:38px;height:38px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s}
+.btn-i:hover{background:var(--card2);color:var(--t1);border-color:var(--purple)}
+.side{background:var(--bg2);border-right:1px solid var(--bdr);padding:20px 16px;overflow-y:auto;max-height:calc(100vh - 65px)}
+.side::-webkit-scrollbar{width:4px}.side::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
+.side-t{font-family:'Fredoka',sans-serif;font-size:1rem;font-weight:600;color:var(--purple);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.wb{margin-bottom:12px}
+.wh{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);cursor:pointer;transition:all .2s;font-weight:700;font-size:.82rem}
+.wh:hover{background:var(--card2)}.wh.act{border-color:var(--purple);box-shadow:var(--glow)}.wh.done{border-color:var(--green)}
+.wh .lb{background:var(--purple);color:var(--bg);border-radius:6px;padding:2px 8px;font-size:.7rem;font-weight:800}
+.wh.done .lb{background:var(--green)}.wh .ch{margin-left:auto;transition:transform .3s;color:var(--t3)}.wh.open .ch{transform:rotate(180deg)}
+.wbd{max-height:0;overflow:hidden;transition:max-height .4s ease}.wbd.open{max-height:2000px}.wbi{padding:8px 4px}
+.dl{padding:6px 12px;border-left:2px solid var(--bdr);margin-left:12px;margin-bottom:4px;font-size:.78rem;color:var(--t2);transition:all .2s;cursor:pointer}
+.dl:hover{background:rgba(171,157,242,.05);border-radius:0 var(--rs) var(--rs) 0}
+.dl.today{border-left-color:var(--yellow);color:var(--t1);font-weight:600}
+.dl.done{border-left-color:var(--green)}
+.dl .dla{font-weight:700;color:var(--t3);font-size:.72rem}.dl.today .dla{color:var(--yellow)}
+.dl .dls{margin-top:2px}
+.wgt{font-size:.75rem;color:var(--t3);padding:8px 12px;background:var(--bg);border-radius:var(--rs);margin-top:4px;line-height:1.5;border:1px solid var(--bdr)}
+.main{padding:24px 28px;overflow-y:auto;max-height:calc(100vh - 65px)}
+.main::-webkit-scrollbar{width:6px}.main::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
+/* View mode banner */
+.view-banner{background:linear-gradient(135deg,rgba(255,158,100,.12),rgba(255,110,150,.08));border:1px solid var(--orange);border-radius:var(--r);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;font-size:.85rem}
+.view-banner .vb-title{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--orange)}
+.view-banner .vb-back{margin-left:auto;padding:6px 14px;border-radius:var(--rs);border:1px solid var(--orange);background:transparent;color:var(--orange);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:.8rem;transition:all .2s}
+.view-banner .vb-back:hover{background:rgba(255,158,100,.15)}
+/* Carry forward banner */
+.cf-banner{background:linear-gradient(135deg,rgba(255,97,136,.1),rgba(171,157,242,.08));border:1px solid var(--red);border-radius:var(--r);padding:14px 20px;margin-bottom:16px}
+.cf-banner h4{font-family:'Fredoka',sans-serif;color:var(--red);font-size:.9rem;margin-bottom:8px}
+.cf-item{font-size:.8rem;color:var(--t2);padding:3px 0}
+.cf-btn{margin-top:10px;padding:6px 14px;border-radius:var(--rs);border:1px solid var(--green);background:transparent;color:var(--green);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:.8rem;transition:all .2s}
+.cf-btn:hover{background:rgba(169,220,118,.15)}
+.focus{background:linear-gradient(135deg,rgba(171,157,242,.1),rgba(255,110,150,.08));border:1px solid var(--bdr);border-radius:var(--r);padding:20px 24px;margin-bottom:20px}
+.focus h3{font-family:'Fredoka',sans-serif;font-size:1rem;color:var(--blue);margin-bottom:12px}
+.fr{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.fc{padding:8px 16px;border-radius:20px;border:1px solid var(--bdr);background:var(--card);cursor:pointer;font-size:.82rem;font-weight:600;transition:all .25s;color:var(--t2)}
+.fc:hover{background:var(--card2);color:var(--t1)}.fc.sel{background:var(--purple);color:var(--bg);border-color:var(--purple);transform:scale(1.05)}
+.bfi{width:100%;padding:10px 16px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--card);color:var(--t1);font-family:'Nunito',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
+.bfi:focus{border-color:var(--red)}.bfi::placeholder{color:var(--t3)}
+.bfl{font-size:.85rem;font-weight:700;color:var(--red);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.qc{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:14px;overflow:hidden;transition:all .3s;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.qc:hover{border-color:var(--card2)}.qc.comp{border-color:var(--green);opacity:.85}
+.qh{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer}
+.qi{font-size:1.3rem}.qt{font-family:'Fredoka',sans-serif;font-weight:600;font-size:.95rem;flex:1}
+.qp{font-size:.75rem;font-weight:800;color:var(--yellow);background:rgba(255,216,102,.1);padding:3px 10px;border-radius:12px}
+.qpm{width:60px;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden}
+.qpmf{height:100%;border-radius:2px;transition:width .5s ease;background:linear-gradient(90deg,var(--green),var(--blue))}
+.qch{color:var(--t3);transition:transform .3s;font-size:.9rem}
+.qc.open .qch{transform:rotate(180deg)}
+.qb{max-height:0;overflow:hidden;transition:max-height .4s ease}.qc.open .qb{max-height:2000px}
+.qbi{padding:4px 18px 16px}
+.ti{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(46,43,63,.5);transition:all .2s}
+.ti:last-child{border-bottom:none}
+.tc{width:22px;height:22px;border-radius:6px;border:2px solid var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0}
+.tc:hover{border-color:var(--green)}
+.tc.chk{background:var(--green);border-color:var(--green);animation:pop .4s ease;box-shadow:0 2px 8px rgba(152,193,160,.4)}
+.tc.chk::after{content:'\2713';color:#fff;font-weight:800;font-size:.75rem}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.tl{flex:1;font-size:.85rem;color:var(--t1);transition:all .3s}
+.ti.chkd .tl{text-decoration:line-through;color:var(--t3)}
+.tif{flex:1;background:transparent;border:none;border-bottom:1px dashed var(--bdr);color:var(--t1);font-family:'Nunito',sans-serif;font-size:.85rem;padding:2px 4px;outline:none}
+.tif::placeholder{color:var(--t3);font-style:italic}.tif:focus{border-bottom-color:var(--blue)}
+.atb{display:flex;align-items:center;gap:6px;padding:6px 12px;margin-top:8px;border:1px dashed var(--bdr);border-radius:var(--rs);background:transparent;color:var(--t3);cursor:pointer;font-size:.8rem;transition:all .2s;font-family:'Nunito',sans-serif}
+.atb:hover{border-color:var(--purple);color:var(--purple)}
+.rmb{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--t3);cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;opacity:0}
+.ti:hover .rmb{opacity:1}.rmb:hover{background:rgba(255,97,136,.15);color:var(--red)}
+.ntag{font-size:.6rem;background:rgba(120,220,232,.15);color:var(--blue);padding:1px 6px;border-radius:4px;font-weight:700;margin-left:4px;flex-shrink:0}
+.cftag{font-size:.6rem;background:rgba(255,97,136,.15);color:var(--red);padding:1px 6px;border-radius:4px;font-weight:700;margin-left:4px;flex-shrink:0}
+.trk{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:20px 24px;margin-top:20px}
+.trk h3{font-family:'Fredoka',sans-serif;font-size:1rem;color:var(--orange);margin-bottom:14px}
+.trk textarea{width:100%;min-height:80px;padding:12px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--bg);color:var(--t1);font-family:'Nunito',sans-serif;font-size:.85rem;resize:vertical;outline:none}
+.trk textarea:focus{border-color:var(--orange)}.trk textarea::placeholder{color:var(--t3)}
+.trk-l{font-size:.82rem;font-weight:700;color:var(--t2);margin:12px 0 6px}
+.sb{background:linear-gradient(135deg,rgba(255,216,102,.08),rgba(255,158,100,.06));border:1px solid var(--bdr);border-radius:var(--r);padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.sd{font-family:'Fredoka',sans-serif;font-size:2.2rem;font-weight:700;color:var(--yellow);min-width:80px;transition:all .3s}
+.st{font-size:.8rem;color:var(--t3)}
+.sbc{flex:1;min-width:200px}
+.sbr{height:12px;background:var(--bg);border-radius:6px;overflow:hidden;position:relative}
+.sbrf{height:100%;border-radius:6px;transition:width .6s ease;background:linear-gradient(90deg,var(--orange),var(--yellow),var(--green))}
+.sms{display:flex;justify-content:space-between;margin-top:6px;font-size:.7rem;color:var(--t3)}
+.sm.hit{color:var(--green);font-weight:700}
+.rts{display:flex;gap:8px;flex-wrap:wrap}
+.rt{padding:4px 10px;border-radius:10px;font-size:.72rem;font-weight:700;border:1px solid var(--bdr);color:var(--t3)}
+.rt.u{animation:rpulse 1s ease infinite}
+.rt.r60{border-color:var(--green);color:var(--green)}.rt.r90{border-color:var(--orange);color:var(--orange)}.rt.r120{border-color:var(--yellow);color:var(--yellow)}
+@keyframes rpulse{0%,100%{opacity:1}50%{opacity:.6}}
+.nb{background:linear-gradient(135deg,rgba(120,220,232,.1),rgba(171,157,242,.08));border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 18px;margin-bottom:16px;font-size:.8rem;color:var(--t2);display:flex;align-items:center;gap:10px}
+.nb .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.nb .dot.on{background:var(--green)}.nb .dot.off{background:var(--red)}
+.nb .sbtn{margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--blue);background:transparent;color:var(--blue);cursor:pointer;font-size:.75rem;font-weight:700;font-family:'Nunito',sans-serif;transition:all .2s}
+.nb .sbtn:hover{background:rgba(120,220,232,.15)}.nb .sbtn:disabled{opacity:.5;cursor:default}
+.si{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,158,100,.08);border:1px solid var(--bdr);border-radius:var(--rs);margin-bottom:20px;font-size:.8rem;color:var(--t2)}
+.si .sl{color:var(--orange);font-weight:700}
+.celeb{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:rgba(253,246,240,.9);backdrop-filter:blur(8px)}
+.celeb.show{display:flex;animation:fadeIn .3s ease}
+.celeb-c{background:var(--card);border:2px solid var(--pink);border-radius:20px;padding:40px 50px;text-align:center;box-shadow:0 8px 40px rgba(247,164,184,.2);max-width:460px;animation:cBounce .5s ease}
+.celeb-e{font-size:4rem;margin-bottom:16px;animation:cSpin 1s ease}
+.celeb-tt{font-family:'Fredoka',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:8px}
+.celeb-m{color:var(--t2);font-size:.95rem;margin-bottom:20px;line-height:1.5}
+.celeb-b{padding:10px 28px;border-radius:20px;border:none;font-family:'Fredoka',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,var(--yellow),var(--orange));color:var(--bg)}
+.celeb-b:hover{transform:scale(1.05)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes cBounce{0%{transform:scale(.5);opacity:0}50%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+@keyframes cSpin{0%{transform:rotate(0) scale(0)}50%{transform:rotate(20deg) scale(1.2)}100%{transform:rotate(0) scale(1)}}
+.confetti{position:fixed;z-index:1001;pointer-events:none;width:10px;height:10px}
+.modal{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;background:rgba(253,246,240,.9);backdrop-filter:blur(6px)}
+.modal.show{display:flex}
+.modal-c{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:28px 32px;max-width:550px;width:90%;max-height:80vh;overflow-y:auto}
+.modal-c h2{font-family:'Fredoka',sans-serif;font-size:1.2rem;color:var(--purple);margin-bottom:16px}
+.mf{margin-bottom:14px}
+.mf label{display:block;font-size:.82rem;font-weight:700;color:var(--t2);margin-bottom:4px}
+.mf .hint{font-size:.72rem;color:var(--t3);margin-top:2px}
+.mi{width:100%;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--bg);color:var(--t1);font-family:'Nunito',sans-serif;font-size:.85rem;outline:none}
+.mi:focus{border-color:var(--purple)}
+.ma{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.mb{padding:8px 20px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--card2);color:var(--t1);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;transition:all .2s}
+.mb.pri{background:var(--purple);color:var(--bg);border-color:var(--purple)}
+.mb:hover{transform:scale(1.03)}
+.mb.dan{border-color:var(--red);color:var(--red)}.mb.dan:hover{background:rgba(255,97,136,.15)}
+.mst{font-size:.9rem;font-weight:700;color:var(--blue);margin:18px 0 8px;padding-top:12px;border-top:1px solid var(--bdr)}
+.we{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px}
+.we.show{display:flex}
+.we-e{font-size:5rem;margin-bottom:20px;animation:wBob 3s ease-in-out infinite}
+.we-t{font-family:'Fredoka',sans-serif;font-size:2rem;color:var(--blue);margin-bottom:8px}
+.we-m{color:var(--t2);font-size:1rem;max-width:400px;line-height:1.6}
+@keyframes wBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.pf{position:fixed;z-index:100;pointer-events:none;font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.2rem;animation:fUp 1.2s ease forwards}
+@keyframes fUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.3)}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 24px;font-size:.85rem;color:var(--t1);box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:900;transition:transform .4s ease,opacity .4s ease;opacity:0;font-weight:600}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* EOD Log Panel */
+.eod-panel{background:var(--card);border:1px solid var(--yellow);border-radius:var(--r);padding:20px 24px;margin-top:20px}
+.eod-panel h3{font-family:'Fredoka',sans-serif;font-size:1rem;color:var(--yellow);margin-bottom:14px}
+.eod-btn{padding:10px 24px;border-radius:var(--rs);border:none;font-family:'Fredoka',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,var(--yellow),var(--orange));color:var(--bg);display:flex;align-items:center;gap:8px}
+.eod-btn:hover{transform:scale(1.03)}
+/* Previous day view */
+.prev-day-log{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:20px 24px;margin-bottom:14px}
+.prev-day-log h4{font-family:'Fredoka',sans-serif;color:var(--purple);margin-bottom:8px}
+.prev-day-log .pdl-stat{display:flex;gap:16px;margin-bottom:12px;font-size:.85rem;flex-wrap:wrap}
+.prev-day-log .pdl-stat span{color:var(--t2)}
+.prev-day-log .pdl-stat .pdl-v{font-weight:700;color:var(--yellow)}
+.prev-quest{margin-bottom:10px}
+.prev-quest h5{font-size:.85rem;font-weight:700;color:var(--t1);margin-bottom:4px}
+.prev-task{font-size:.8rem;color:var(--t2);padding:2px 0;display:flex;align-items:center;gap:6px}
+.prev-task .ptc{color:var(--green)}.prev-task .ptx{color:var(--t3)}
+@media(max-width:900px){.app{grid-template-columns:1fr}.side{max-height:300px;border-right:none;border-bottom:1px solid var(--bdr)}.main{max-height:none}.top{padding:12px 16px}.main{padding:16px}}
+</style>
+</head>
+<body>
+<div class="bg-orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<div class="app">
+<div class="top">
+<div class="top-l"><div class="logo">🎮 Navvu's To Do List</div><div class="badge" id="dayBadge">Day 1</div></div>
+<div class="top-c">
+<div class="pill pts"><span class="i">⭐</span><span class="v" id="tPts">0</span> pts</div>
+<div class="pill str"><span class="i">🔥</span><span class="v" id="tStr">0</span> streak</div>
+<div class="pill cmp"><span class="i">✅</span><span class="v" id="tCmp">0%</span></div>
+</div>
+<div class="top-r">
+<div class="ring"><svg width="48" height="48"><circle class="ring-bg" cx="24" cy="24" r="20"/><circle class="ring-f" id="pRing" cx="24" cy="24" r="20" stroke-dasharray="125.66" stroke-dashoffset="125.66"/></svg><div class="ring-t" id="pText">0%</div></div>
+<button class="btn-i" id="setBtn" title="Settings">⚙️</button>
+<button class="btn-i" id="rstBtn" title="Reset today">🔄</button>
+</div>
+</div>
+<div class="side" id="sidebar"></div>
+<div class="main" id="main"></div>
+</div>
+<div class="celeb" id="celeb" onclick="if(event.target===this)closeCeleb()">
+<div class="celeb-c"><div class="celeb-e" id="cE">🎉</div><div class="celeb-tt" id="cT">Amazing!</div><div class="celeb-m" id="cM">Great!</div><button class="celeb-b" onclick="closeCeleb()">Let's Go! 💪</button></div>
+</div>
+<div class="modal" id="setModal" onclick="if(event.target===this)closeSet()">
+<div class="modal-c">
+<h2>⚙️ Settings</h2>
+<div class="mst">📅 General</div>
+<div class="mf"><label>Start Date (Day 1 = first weekday)</label><input class="mi" id="sDate" type="date"></div>
+<div class="mst">📝 Logging</div>
+<div class="mf"><label>Logs Folder</label><div style="display:flex;gap:8px"><input class="mi" id="logsFolder" type="text" placeholder="Select a folder..." readonly><button class="mb" onclick="selectLogsFolder()" style="padding:8px 12px">Browse</button></div></div>
+<div class="mf"><label>Log Format</label><select class="mi" id="logFormat"><option value="md">Markdown (.md)</option><option value="txt">Plain Text (.txt)</option><option value="json">JSON (.json)</option></select></div>
+<div class="mf"><label>Recent Log Files</label><div id="logFilesList" style="max-height:150px;overflow-y:auto;border:1px solid var(--bdr);border-radius:6px;padding:8px;background:var(--card);font-size:.8rem;color:var(--t2);"><em>No folder selected or no files found.</em></div><button class="mb" onclick="refreshLogFiles()" style="padding:6px 12px;margin-top:8px">Refresh List</button></div>
+<div class="mst">🔗 Notion Trackers</div>
+<div style="font-size:.78rem;color:var(--t2);line-height:1.8">
+<a href="https://www.notion.so/333cc92a7b0b814b85f4dd0be258b01e" target="_blank" style="color:var(--blue)">📅 90-Day Master Schedule</a><br>
+<a href="https://www.notion.so/333cc92a7b0b81869a90c8f71abda1df" target="_blank" style="color:var(--blue)">🏢 Job Applications Tracker</a><br>
+<a href="https://www.notion.so/333cc92a7b0b81218f96dad5ffabd468" target="_blank" style="color:var(--blue)">🧠 Claude Quiz Tracker</a><br>
+<a href="https://www.notion.so/333cc92a7b0b81caa902d4c55418d05d" target="_blank" style="color:var(--blue)">💻 Freelancing Tracker</a><br>
+<a href="https://www.notion.so/333cc92a7b0b81b1852fe5ed2ed1bd5a" target="_blank" style="color:var(--blue)">🎓 Certifications Tracker</a><br>
+<a href="https://www.notion.so/333cc92a7b0b8119b808efb05a211b53" target="_blank" style="color:var(--blue)">💼 Projects Portfolio</a><br>
+<a href="https://www.notion.so/333cc92a7b0b81aa9c21eab416d99633" target="_blank" style="color:var(--blue)">🎯 Networking Hub</a><br>
+<a href="https://www.notion.so/333cc92a7b0b81098f53c82d2574e752" target="_blank" style="color:var(--blue)">🚗 Driving License Tracker</a><br>
+<a href="https://www.notion.so/333cc92a7b0b81e5a775f588459282d7" target="_blank" style="color:var(--blue)">🇫🇷 French Language Tracker</a>
+</div>
+<div class="mst">💡 Notion Sync</div>
+<div style="font-size:.78rem;color:var(--t2)">Notion sync is managed via Claude chat. Come back to this Claude conversation and say "save today's log to Notion" to write your daily progress. Say "update my tasks from Notion" to pull changes.</div>
+<div class="ma">
+<button class="mb pri" onclick="saveSet()">Save</button>
+<button class="mb" onclick="closeSet()">Cancel</button>
+<button class="mb" onclick="exportData()">📦 Export</button>
+<button class="mb" onclick="importData()">📥 Import</button>
+<button class="mb dan" onclick="resetAll()" style="margin-left:auto">🗑️ Reset</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// =============================================
+// NAVVU'S TO DO LIST v4 — HARDCODED SCHEDULE
+// =============================================
+// All dates in Vancouver timezone (PDT UTC-7)
+// Day 0 = March 30-31 (setup), Week 1 starts April 1
+
+var START_DATE = '2026-04-01'; // First weekday of the 90-day plan
+var STREAK_THRESH = 60;
+var PLAN_PAGE_ID = '32fcc92a7b0b8184b1c7ed45744b7319';
+
+// =============================================
+// WEEKLY TASK DATA (from Notion 90-Day Schedule)
+// =============================================
+// Each week defines quest-category tasks that vary week to week
+// Tasks are mapped to categories: apply, network, portfolio, learning, admin, french, driving
+
+var WEEKLY_TASKS = {
+  0: { // Day 0: March 30-31 (setup) — March 31 tasks
+    label: 'Day 0 — Setup (Mar 31)',
+    apply: [],
+    network: [
+      {l:'Write professor outreach emails (UBC, UofT, McMaster, Polytechnique)',t:'check'},
+      {l:'Create/update LinkedIn with new headline',t:'check'},
+      {l:'Research Engineers Without Borders Canada',t:'check'},
+    ],
+    portfolio: [
+      {l:'Set up GitHub profile README',t:'check'},
+    ],
+    learning: [
+      {l:'Claude Technical Quiz — heat transfer fundamentals (1 hr)',t:'check'},
+      {l:'Enroll in Coursera — Thermal Systems + Sustainability (audit)',t:'check'},
+    ],
+    admin: [
+      {l:'Begin Ansys Student free download',t:'check'},
+      {l:'Fix resume — professional summary, education, Canadian address',t:'check'},
+      {l:'Sign up on Upwork',t:'check'},
+      {l:'Register on Freelancer.com, SimScale Community, CFD Online',t:'check'},
+    ],
+    french: [
+      {l:'Download Duolingo, start French course',t:'check'},
+      {l:'Learn: Bonjour, Merci, S\'il vous plaît, Je m\'appelle...',t:'check'},
+    ],
+    driving: [
+      {l:'Download ICBC handbook + practice test app',t:'check'},
+      {l:'Read Ch 1\u20132, do 20 practice questions',t:'check'},
+    ],
+  },
+  // Special: date-specific overrides for March 30 (used by viewDay)
+  'mar30': {
+    label: 'Day 0 — Setup (Mar 30)',
+    apply: [],
+    network: [],
+    portfolio: [],
+    learning: [],
+    admin: [
+      {l:'GitHub account created',t:'check'},
+      {l:'OpenFOAM installed',t:'check'},
+      {l:'SimScale free account created',t:'check'},
+      {l:'Udemy courses enrolled (PMP, Python Mech, 100 Days Python)',t:'check'},
+      {l:'Notion 90-Day Plan created',t:'check'},
+      {l:'Navvu\'s To Do List app created',t:'check'},
+    ],
+    french: [],
+    driving: [],
+  },
+  1: { // Week 1: April 1-6
+    label: 'Week 1 — Foundation',
+    apply: [
+      {l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},
+      {l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},
+      {l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},
+      {l:'Application 10:',t:'input'},
+    ],
+    network: [
+      {l:'Professor email 1:',t:'input'},{l:'Professor email 2:',t:'input'},
+      {l:'Professor email 3:',t:'input'},{l:'Professor email 4:',t:'input'},
+      {l:'Professor email 5:',t:'input'},
+      {l:'LinkedIn post — intro + open to work',t:'check'},
+    ],
+    portfolio: [
+      {l:'OpenFOAM: install + run cavity tutorial',t:'check'},
+      {l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},
+    ],
+    learning: [
+      {l:'Claude Quiz (1 hr)',t:'check'},
+      {l:'PMP Course — watch 2 hrs content',t:'check'},
+      {l:'Python Bootcamp Day:',t:'input'},
+      {l:'Key takeaway:',t:'input'},
+    ],
+    admin: [
+      {l:'Resume/LinkedIn improvement:',t:'input'},
+      // Removed undetermined external task to match Notion source.
+    ],
+    french: [
+      {l:'Duolingo (15 min)',t:'check'},
+      {l:'Extra study (15 min)',t:'check'},
+    ],
+    driving: [
+      {l:'Read chapters + 20 practice Qs',t:'check'},
+      {l:'Practice test score:',t:'input'},
+    ],
+  },
+  2: { // Week 2: April 7-13
+    label: 'Week 2 — ICBC Test Week',
+    apply: [
+      {l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},
+      {l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},
+      {l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},
+      {l:'Application 10:',t:'input'},
+    ],
+    network: [
+      {l:'Professor email/follow-up:',t:'input'},
+      {l:'LinkedIn post — OpenFOAM journey + screenshot',t:'check'},
+    ],
+    portfolio: [
+      {l:'OpenFOAM: pitzDaily tutorial',t:'check'},
+      {l:'Watch 2 Jozsef Nagy videos',t:'check'},
+      {l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},
+    ],
+    learning: [
+      {l:'Claude Quiz (1 hr)',t:'check'},
+      {l:'PMP Course — 2 hrs content',t:'check'},
+      {l:'Python Bootcamp Day:',t:'input'},
+    ],
+    admin: [
+      {l:'Complete Upwork profile to 100%',t:'check'},
+      {l:'Complete Freelancer profile to 100%',t:'check'},
+      {l:'Freelancing — 5 proposals on Upwork',t:'check'},
+      {l:'Freelancing — 3 bids on Freelancer',t:'check'},
+    ],
+    french: [
+      {l:'Duolingo (15 min)',t:'check'},
+      {l:'Extra study (15 min)',t:'check'},
+    ],
+    driving: [
+      {l:'Practice tests — target 90%+',t:'check'},
+      {l:'🎉 WRITE ICBC Knowledge Test',t:'check'},
+    ],
+  },
+  3: { // Week 3: April 14-20
+    label: 'Week 3 — Project 1 Start',
+    apply: [
+      {l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},
+      {l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},
+      {l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},
+      {l:'Application 10:',t:'input'},
+    ],
+    network: [
+      {l:'Follow up on Week 1 professor emails (5)',t:'check'},
+      {l:'LinkedIn post — OpenFOAM project progress',t:'check'},
+    ],
+    portfolio: [
+      {l:'OpenFOAM Project 1: gas turbine film cooling setup',t:'check'},
+      {l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},
+      {l:'Work block 3 (25 min)',t:'check'},{l:'Work block 4 (25 min)',t:'check'},
+    ],
+    learning: [
+      {l:'Claude Quiz (1 hr)',t:'check'},
+      {l:'PMP Course — 3 hrs (accelerate)',t:'check'},
+      {l:'Python Bootcamp Day:',t:'input'},
+    ],
+    admin: [
+      {l:'Freelancing — 5 Upwork proposals',t:'check'},
+      {l:'Freelancing — 3 Freelancer bids',t:'check'},
+    ],
+    french: [
+      {l:'Duolingo (15 min)',t:'check'},
+      {l:'Extra study (15 min)',t:'check'},
+    ],
+    driving: [
+      {l:'Supervised driving (2 hrs)',t:'check'},
+    ],
+  },
+  4: { // Week 4
+    label: 'Week 4 — Project 1 Complete',
+    apply: [
+      {l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},
+      {l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},
+      {l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},
+      {l:'Application 10:',t:'input'},
+    ],
+    network: [{l:'LinkedIn post — Project 1 results',t:'check'}],
+    portfolio: [
+      {l:'OpenFOAM Project 1: Complete + push GitHub',t:'check'},
+      {l:'SimScale: create account + first sim',t:'check'},
+      {l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},
+      {l:'Commit / push to GitHub',t:'check'},
+    ],
+    learning: [
+      {l:'Claude Quiz (1 hr)',t:'check'},
+      {l:'PMP Course — 3 hrs (Module 1)',t:'check'},
+      {l:'Python Bootcamp Day:',t:'input'},
+      {l:'Python Mech Engineers — start (1 hr)',t:'check'},
+    ],
+    admin: [
+      {l:'Freelancing — 5 Upwork + 3 Freelancer',t:'check'},
+      {l:'Month 1 Review',t:'check'},
+    ],
+    french: [{l:'Duolingo (15 min)',t:'check'},{l:'Extra (15 min)',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'}],
+  },
+  5: { // Week 5
+    label: 'Week 5 — Project 2 Start',
+    apply: [{l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},{l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},{l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},{l:'Application 10:',t:'input'}],
+    network: [{l:'RA/PhD email 1:',t:'input'},{l:'RA/PhD email 2:',t:'input'},{l:'RA/PhD email 3:',t:'input'},{l:'RA/PhD email 4:',t:'input'},{l:'RA/PhD email 5:',t:'input'},{l:'LinkedIn post — Python heat transfer demo',t:'check'}],
+    portfolio: [{l:'Project 2: heat exchanger optimization',t:'check'},{l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},{l:'Work block 3 (25 min)',t:'check'},{l:'Work block 4 (25 min)',t:'check'}],
+    learning: [{l:'Claude Quiz (1 hr)',t:'check'},{l:'PMP Course — 3 hrs',t:'check'},{l:'Python Bootcamp Day:',t:'input'},{l:'Python Mech Engineers (2 hrs)',t:'check'}],
+    admin: [{l:'Freelancing — 8 proposals',t:'check'}],
+    french: [{l:'Duolingo (15 min)',t:'check'},{l:'Anki flashcards — workplace vocab',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'}],
+  },
+  6: { // Week 6
+    label: 'Week 6 — Project 2 Complete',
+    apply: [{l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},{l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},{l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},{l:'Application 10:',t:'input'}],
+    network: [{l:'Follow up on Week 5 RA/PhD emails',t:'check'},{l:'LinkedIn post — Project 2 results',t:'check'},{l:'Attend networking event (OSPE/EWB)',t:'check'}],
+    portfolio: [{l:'Project 2: Complete + GitHub + LinkedIn',t:'check'},{l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},{l:'Commit / push to GitHub',t:'check'}],
+    learning: [{l:'Claude Quiz (1 hr)',t:'check'},{l:'PMP Course — 3.5 hrs (push harder)',t:'check'},{l:'Python Bootcamp Day:',t:'input'},{l:'Python Mech Engineers (2 hrs)',t:'check'}],
+    admin: [{l:'Freelancing — 8 proposals',t:'check'},{l:'Register on Kolabtree + Guru.com',t:'check'}],
+    french: [{l:'Duolingo (15 min)',t:'check'},{l:'Extra (15 min)',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'}],
+  },
+  7: { // Week 7
+    label: 'Week 7 — Project 3 + Nuclear',
+    apply: [{l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},{l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},{l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},{l:'Application 10:',t:'input'}],
+    network: [{l:'RA/PhD email (5 new universities):',t:'input'},{l:'LinkedIn post — nuclear sector angle',t:'check'}],
+    portfolio: [{l:'Project 3: pipeline CFD start',t:'check'},{l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},{l:'Work block 3 (25 min)',t:'check'}],
+    learning: [{l:'Claude Quiz — interview prep (1 hr)',t:'check'},{l:'PMP Course — 3.5 hrs (nearing done)',t:'check'},{l:'Python Bootcamp Day:',t:'input'},{l:'Python Mech Engineers (2.5 hrs)',t:'check'}],
+    admin: [{l:'Freelancing — 8 proposals ($45-55/hr)',t:'check'},{l:'Nuclear applications: Bruce Power, OPG, SNC-Lavalin',t:'check'}],
+    french: [{l:'Duolingo (15 min)',t:'check'},{l:'HelloTalk — find practice partner',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'}],
+  },
+  8: { // Week 8
+    label: 'Week 8 — PMP + Python Done! 🎉',
+    apply: [{l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},{l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},{l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},{l:'Application 10:',t:'input'}],
+    network: [{l:'Follow up on Week 7 emails',t:'check'},{l:'LinkedIn post — PMP + Python done milestone',t:'check'}],
+    portfolio: [{l:'Project 3: Complete + GitHub + LinkedIn',t:'check'},{l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},{l:'Commit / push to GitHub',t:'check'}],
+    learning: [{l:'Claude Quiz (1 hr)',t:'check'},{l:'🎉 PMP Course — complete all 35 hrs!',t:'check'},{l:'🎉 Python Bootcamp — finish!',t:'check'},{l:'Python Mech Engineers (3 hrs)',t:'check'}],
+    admin: [{l:'Freelancing — 8 proposals (Month 2 review)',t:'check'},{l:'LinkedIn Services page setup',t:'check'},{l:'Month 2 Review',t:'check'}],
+    french: [{l:'Duolingo (15 min)',t:'check'},{l:'Check: 2-min intro conversation?',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'}],
+  },
+  9: { // Week 9
+    label: 'Week 9 — Aggressive Mode',
+    apply: [{l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},{l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},{l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},{l:'Application 10:',t:'input'}],
+    network: [{l:'5 final RA/PhD emails',t:'check'},{l:'LinkedIn post — sustainability angle',t:'check'}],
+    portfolio: [{l:'Project 4: energy audit start',t:'check'},{l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'},{l:'Work block 3 (25 min)',t:'check'}],
+    learning: [{l:'Claude Quiz — mock interviews (1 hr)',t:'check'},{l:'Python Mech Engineers (4 hrs)',t:'check'}],
+    admin: [{l:'Freelancing — 10 proposals ($65-80/hr)',t:'check'},{l:'Direct outreach to Canadian firms',t:'check'}],
+    french: [{l:'Duolingo (15 min)',t:'check'},{l:'Passé composé practice',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'}],
+  },
+  10: { // Week 10
+    label: 'Week 10 — Project 4 Complete',
+    apply: [{l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},{l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},{l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},{l:'Application 10:',t:'input'}],
+    network: [{l:'LinkedIn post — all 4 projects showcase',t:'check'},{l:'Ask 2 clients for testimonials',t:'check'}],
+    portfolio: [{l:'Project 4: Complete + GitHub + LinkedIn',t:'check'},{l:'SimScale — post public simulation',t:'check'},{l:'Work block 1 (25 min)',t:'check'},{l:'Work block 2 (25 min)',t:'check'}],
+    learning: [{l:'Claude Quiz — project walkthroughs (1 hr)',t:'check'},{l:'Python Mech Engineers (4 hrs)',t:'check'},{l:'Mock interview with friend/recording',t:'check'}],
+    admin: [{l:'Freelancing — 10 proposals',t:'check'}],
+    french: [{l:'Duolingo (15 min)',t:'check'},{l:'HelloTalk x2 this week',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'}],
+  },
+  11: { // Week 11
+    label: 'Week 11 — Python Mech Done! 🎉',
+    apply: [{l:'Application 1:',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},{l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},{l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},{l:'Application 10:',t:'input'}],
+    network: [{l:'LinkedIn post — Python Mech done milestone',t:'check'},{l:'Final professor follow-ups',t:'check'}],
+    portfolio: [{l:'Record 5 technical question answers',t:'check'},{l:'Work block (interview prep)',t:'check'}],
+    learning: [{l:'Claude Quiz — full mock interview (1 hr)',t:'check'},{l:'🎉 Python Mech Engineers — complete!',t:'check'}],
+    admin: [{l:'Freelancing — 10 proposals (apply Toptal)',t:'check'},{l:'Offer retainers to best clients',t:'check'}],
+    french: [{l:'Duolingo (15 min)',t:'check'},{l:'Read article on savoirs.rfi.fr',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'},{l:'Plan Class 7N road test',t:'check'}],
+  },
+  12: { // Week 12
+    label: 'Week 12 — The Finish Line 🏆',
+    apply: [{l:'Application 1 (personal outreach):',t:'input'},{l:'Application 2:',t:'input'},{l:'Application 3:',t:'input'},{l:'Application 4:',t:'input'},{l:'Application 5:',t:'input'},{l:'Application 6:',t:'input'},{l:'Application 7:',t:'input'},{l:'Application 8:',t:'input'},{l:'Application 9:',t:'input'},{l:'Application 10:',t:'input'}],
+    network: [{l:'LinkedIn post — 90-day journey reflection 🎉',t:'check'}],
+    portfolio: [],
+    learning: [{l:'Claude Quiz — final mock interview (1 hr)',t:'check'},{l:'90-Day Review — what worked, what didn\'t',t:'check'}],
+    admin: [{l:'Freelancing — 10 proposals (testimonials)',t:'check'},{l:'Total freelancing income review',t:'check'}],
+    french: [{l:'🎉 Take A1 test — test-de-francais.com',t:'check'},{l:'Add French A1 to resume + LinkedIn',t:'check'}],
+    driving: [{l:'Supervised driving (2 hrs)',t:'check'},{l:'90-day total driving hours check',t:'check'}],
+  },
+};
+
+// Quest category metadata
+var CATS = {
+  apply:{icon:'\u{1F680}',title:'Quest 1: Apply',pts:3,pl:'+3 per app',color:'var(--pink)',link:'https://www.notion.so/333cc92a7b0b81869a90c8f71abda1df',linkLabel:'\u{1F3E2} Job Applications Tracker'},
+  network:{icon:'\u{1F91D}',title:'Quest 2: Network',pts:5,pl:'+5 per action',color:'var(--blue)',link:'https://www.notion.so/333cc92a7b0b81aa9c21eab416d99633',linkLabel:'\u{1F3AF} Networking Hub'},
+  portfolio:{icon:'\u{1F9EA}',title:'Quest 3: Portfolio',pts:20,pl:'+20 per commit',color:'var(--green)',link:'https://www.notion.so/333cc92a7b0b8119b808efb05a211b53',linkLabel:'\u{1F4BC} Projects Portfolio'},
+  learning:{icon:'\u{1F4DA}',title:'Quest 4: Learning',pts:10,pl:'+10 per hour',color:'var(--orange)',link:'https://www.notion.so/333cc92a7b0b81b1852fe5ed2ed1bd5a',linkLabel:'\u{1F393} Certifications Tracker'},
+  admin:{icon:'\u{1F9FE}',title:'Quest 5: Admin',pts:5,pl:'+5 per task',color:'var(--purple)',link:'https://www.notion.so/333cc92a7b0b81caa902d4c55418d05d',linkLabel:'\u{1F4BB} Freelancing Tracker'},
+  french:{icon:'\u{1F1EB}\u{1F1F7}',title:'Quest 6: French',pts:10,pl:'+10 per session',color:'var(--yellow)',link:'https://www.notion.so/333cc92a7b0b81e5a775f588459282d7',linkLabel:'\u{1F1EB}\u{1F1F7} French Tracker'},
+  driving:{icon:'\u{1F697}',title:'Quest 7: Driving',pts:5,pl:'+5 per task',color:'var(--blue)',link:'https://www.notion.so/333cc92a7b0b81098f53c82d2574e752',linkLabel:'\u{1F697} Driving License Tracker'},
+};
+var CAT_ORDER = ['apply','network','portfolio','learning','admin','french','driving'];
+
+// Week guide for sidebar
+var WGUIDE = [
+  {w:'1\u20132',lv:'1\u20132',nm:'Foundation',d:'10 apps/day + Claude Quiz + OpenFOAM. GitHub, Upwork, professor emails, ICBC test.'},
+  {w:'3\u20134',lv:'3\u20134',nm:'Projects Start',d:'10 apps/day + Project 1 complete + Python ramp. Freelancing proposals, PMP.'},
+  {w:'5\u20138',lv:'5\u20138',nm:'Momentum',d:'10 apps/day + Projects 2-3 + PMP done + Python done. Freelancing revenue.'},
+  {w:'9\u201312',lv:'9\u201312',nm:'Close',d:'10 apps/day + interview prep + Project 4. Python Mech done. Full mock interviews.'},
+];
+
+// Celebrations
+var CELEBS = {
+  quarter:[{e:'\u{1F31F}',t:'Quarter Done!',m:'25% cleared!'},{e:'\u{1F4AA}',t:'Building Steam!',m:'25% down, 75% to go!'}],
+  sixty:[{e:'\u2615',t:'Break Earned!',m:'60 pts! Take a walk.'},{e:'\u{1F33F}',t:'Recharge!',m:'60 pts! Step away.'}],
+  ninety:[{e:'\u{1F355}',t:'Snack & Movie!',m:'90 pts! You earned it.'},{e:'\u{1F354}',t:'Treat Yourself!',m:'90 pts. Order something.'}],
+  onetwenty:[{e:'\u{1F3C6}',t:'LEGENDARY!',m:'120 pts! Half-day off.'},{e:'\u{1F451}',t:'ABSOLUTE BEAST!',m:'120! Different level.'}],
+  bossfight:[{e:'\u2694\uFE0F',t:'BOSS DEFEATED!',m:'Hardest task DONE.'},{e:'\u{1F409}',t:'DRAGON SLAIN!',m:'Hero status unlocked.'}],
+  allDone:[{e:'\u{1F308}',t:'100% COMPLETE!',m:'Every task done!'},{e:'\u2728',t:'FLAWLESS!',m:'Today was yours.'}],
+};
+
+// =============================================
+// STATE
+// =============================================
+var ui = {oq:new Set(),ow:new Set(),ai:null,viewDate:null}; // viewDate: viewing a previous day's log
+var S = null; // Will be initialized after storage is ready
+
+// Initialize app once storage is ready
+async function initApp() {
+  if (window.navvuStorage) {
+    await window.navvuStorage.ready;
+  }
+  S = await loadS();
+
+  // If logs folder is saved in state, sync it to main process for external saving.
+  if (S && S.logsFolder && window.electron && window.electron.setLogsFolder) {
+    await window.electron.setLogsFolder(S.logsFolder);
+  }
+
+  render();
+}
+
+// Fallback loadS for async storage
+var _originalLoadS = loadS;
+async function loadS(){
+  try{
+    var sv;
+    if (window.navvuStorage) {
+      sv = await window.navvuStorage.getItem('navvus-v4');
+    } else {
+      sv = localStorage.getItem('navvus-v4');
+    }
+    
+    if(sv){
+      var s=JSON.parse(sv);
+      if(!s.quests||!Array.isArray(s.quests)||!s.today||!s.startDate){console.warn('Corrupted state');return defS();}
+      if(!s.miles)s.miles=defMile();
+      if(!('allDone' in s.miles))s.miles.allDone=false;
+      if(!s.dailyLog)s.dailyLog={};
+      if(typeof s.points!=='number')s.points=0;
+      if(typeof s.streak!=='number')s.streak=0;
+      var td=todayStr();
+      if(s.today!==td)return newDay(s,td);
+      return s;
+    }
+  }catch(e){console.error('State load failed:',e);}
+  return defS();
+}
+
+function defMile(){return{quarter:false,sixty:false,ninety:false,onetwenty:false,allDone:false};}
+
+function buildQuests(weekNum){
+  var wk = WEEKLY_TASKS[weekNum] || WEEKLY_TASKS[1];
+  return CAT_ORDER.map(function(cid){
+    var cat = CATS[cid];
+    var wTasks = wk[cid] || [];
+    return {
+      id:cid, icon:cat.icon, title:cat.title, pts:cat.pts, pl:cat.pl,
+      tasks: wTasks.map(function(t,i){return{id:cid+'_w'+weekNum+'_'+i,label:t.l,type:t.t,checked:false,value:''};}),
+      cfTasks: [], // carry-forward from previous day
+    };
+  });
+}
+
+function defS(){
+  // Pre-populated logs for March 30 & 31 from Notion
+  var preLogs = {
+    '2026-03-30': {
+      points:0, completion:69, summary:'Setup: 9/13 tasks done', tasks:13, done:9,
+      focusTheme:'Setup Day', bossFight:'', bossFightDone:false, appNotes:'', reflections:'Day 0 setup — systems in place',
+      quests:[
+        {id:'admin',icon:'\u{1F9FE}',title:'Quest: Admin',pts:5,pl:'+5',tasks:[
+          {id:'s1',label:'GitHub account created',type:'check',checked:true,value:''},
+          {id:'s2',label:'OpenFOAM installed',type:'check',checked:true,value:''},
+          {id:'s3',label:'SimScale free account created',type:'check',checked:true,value:''},
+          {id:'s4',label:'Udemy courses enrolled (PMP, Python, 100 Days)',type:'check',checked:true,value:''},
+          {id:'s5',label:'Notion 90-Day Plan created',type:'check',checked:true,value:''},
+          {id:'s6',label:'Navvu To Do List app created',type:'check',checked:true,value:''},
+        ],cfTasks:[]},
+      ]
+    },
+    '2026-03-31': {
+      points:25, completion:42, summary:'Setup Day 2: 5/12 done', tasks:12, done:5,
+      focusTheme:'Setup Day', bossFight:'Fix resume', bossFightDone:true, appNotes:'', reflections:'Got key admin tasks done. Carry forward remaining.',
+      quests:[
+        {id:'admin',icon:'\u{1F9FE}',title:'Quest: Admin',pts:5,pl:'+5',tasks:[
+          {id:'d1',label:'Fix resume — professional summary, Canadian address',type:'check',checked:true,value:''},
+          {id:'d2',label:'Create/update LinkedIn with new headline',type:'check',checked:true,value:''},
+          {id:'d3',label:'Begin Ansys Student free download',type:'check',checked:false,value:''},
+          {id:'d4',label:'Enroll Coursera — Thermal Systems + Sustainability',type:'check',checked:false,value:''},
+          {id:'d5',label:'Sign up on Upwork, Freelancer, SimScale, CFD Online',type:'check',checked:false,value:''},
+          {id:'d6',label:'Set up GitHub profile README',type:'check',checked:false,value:''},
+          {id:'d7',label:'Research Engineers Without Borders Canada',type:'check',checked:false,value:''},
+        ],cfTasks:[]},
+        {id:'network',icon:'\u{1F91D}',title:'Quest: Network',pts:5,pl:'+5',tasks:[
+          {id:'d8',label:'Write professor outreach emails (UBC, UofT, McMaster, Polytechnique)',type:'check',checked:false,value:''},
+        ],cfTasks:[]},
+        {id:'driving',icon:'\u{1F697}',title:'Quest: Driving',pts:5,pl:'+5',tasks:[
+          {id:'d9',label:'Download ICBC handbook + practice test app',type:'check',checked:true,value:''},
+          {id:'d10',label:'Read Ch 1 — Responsibilities of a Driver',type:'check',checked:true,value:''},
+          {id:'d11',label:'Read Ch 2 + 20 practice questions',type:'check',checked:false,value:''},
+        ],cfTasks:[]},
+        {id:'french',icon:'\u{1F1EB}\u{1F1F7}',title:'Quest: French',pts:10,pl:'+10',tasks:[
+          {id:'d12',label:'Download Duolingo, start French course',type:'check',checked:true,value:''},
+          {id:'d13',label:'Learn: Bonjour, Merci, S\'il vous plaît...',type:'check',checked:false,value:''},
+        ],cfTasks:[]},
+        {id:'learning',icon:'\u{1F4DA}',title:'Quest: Learning',pts:10,pl:'+10',tasks:[
+          {id:'d14',label:'Claude Quiz — heat transfer fundamentals (1 hr)',type:'check',checked:false,value:''},
+        ],cfTasks:[]},
+      ]
+    }
+  };
+  var q = buildQuests(getWN(getDNStatic(todayStr(),START_DATE)));
+  return {
+    startDate:START_DATE, planPageId:PLAN_PAGE_ID,
+    today:todayStr(), focusTheme:'', bossFight:'', bossFightDone:false,
+    quests:q, points:0,
+    dailyLog:preLogs, streak:0,
+    appNotes:'', reflections:'', miles:defMile(), lastSync:null,
+  };
+}
+
+function todayStr(){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Vancouver',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
+
+function loadS(){
+  try{
+    var sv=localStorage.getItem('navvus-v4');
+    if(sv){
+      var s=JSON.parse(sv);
+      if(!s.quests||!Array.isArray(s.quests)||!s.today||!s.startDate){console.warn('Corrupted state');return defS();}
+      if(!s.miles)s.miles=defMile();
+      if(!('allDone' in s.miles))s.miles.allDone=false;
+      if(!s.dailyLog)s.dailyLog={};
+      if(typeof s.points!=='number')s.points=0;
+      if(typeof s.streak!=='number')s.streak=0;
+      var td=todayStr();
+      if(s.today!==td)return newDay(s,td);
+      return s;
+    }
+  }catch(e){console.error('State load failed:',e);}
+  return defS();
+}
+
+function saveS(){
+  var stateStr = JSON.stringify(S);
+  if (window.navvuStorage) {
+    // Fire and forget for UI responsiveness
+    window.navvuStorage.setItem('navvus-v4', stateStr).catch(function(err) {
+      console.error('Storage save failed:', err);
+    });
+  } else {
+    localStorage.setItem('navvus-v4', stateStr);
+  }
+}
+
+function newDay(old,td){
+  var yd=old.today;
+  var restoreData = old.dailyLog && old.dailyLog[td] && old.dailyLog[td].quests ? old.dailyLog[td] : null;
+  // Archive yesterday
+  if(yd&&!isWE(yd)){
+    var tt=cntT(old.quests),dn=cntD(old.quests);
+    old.dailyLog[yd]={
+      points:old.points,
+      completion:tt>0?Math.round((dn/tt)*100):0,
+      summary:genSum(old),
+      tasks:tt, done:dn,
+      quests:JSON.parse(JSON.stringify(old.quests)), // full quest state for detailed log viewing
+      focusTheme:old.focusTheme||'',
+      bossFight:old.bossFight||'',
+      bossFightDone:old.bossFightDone||false,
+      appNotes:old.appNotes||'',
+      reflections:old.reflections||'',
+    };
+    if(old.points>=STREAK_THRESH){old.streak=(old.streak||0)+1;}else{old.streak=0;}
+  }
+
+  var wn = getWN(getDN(td));
+  var quests = restoreData ? JSON.parse(JSON.stringify(restoreData.quests)) : buildQuests(wn);
+  if(!restoreData) {
+    quests.forEach(function(q){q.cfTasks = q.cfTasks || [];});
+  } else {
+    quests.forEach(function(q){q.cfTasks = q.cfTasks || [];});
+  }
+
+  return {
+    startDate:old.startDate||START_DATE, planPageId:old.planPageId||PLAN_PAGE_ID,
+    today:td, focusTheme:restoreData?restoreData.focusTheme||'':'', bossFight:restoreData?restoreData.bossFight||'':'', bossFightDone:restoreData?restoreData.bossFightDone||false:false,
+    quests:quests, points:restoreData?(restoreData.points!=null?restoreData.points:calcPts(quests)):0, dailyLog:old.dailyLog||{}, streak:old.streak||0,
+    appNotes:restoreData?restoreData.appNotes||'':'', reflections:restoreData?restoreData.reflections||'':'', miles:defMile(), lastSync:old.lastSync||null,
+  };
+}
+
+function isWE(ds){var d=new Date(ds+'T12:00:00');return d.getDay()===0||d.getDay()===6;}
+function getDN(ds){var s=new Date(S.startDate+'T00:00:00'),c=new Date(ds+'T00:00:00'),n=0,d=new Date(s);while(d<=c){if(d.getDay()!==0&&d.getDay()!==6)n++;d.setDate(d.getDate()+1);}return n;}
+function getDNStatic(ds,sd){var s=new Date(sd+'T00:00:00'),c=new Date(ds+'T00:00:00'),n=0,d=new Date(s);while(d<=c){if(d.getDay()!==0&&d.getDay()!==6)n++;d.setDate(d.getDate()+1);}return n;}
+function getWN(dn){return Math.ceil(dn/5);}
+function cntT(qs){return qs.reduce(function(s,q){return s+q.tasks.filter(function(t){return !t.carriedTo;}).length+(q.cfTasks?q.cfTasks.filter(function(t){return !t.carriedTo;}).length:0);},0);}
+function cntD(qs){return qs.reduce(function(s,q){return s+q.tasks.filter(function(t){return !t.carriedTo&&t.checked;}).length+(q.cfTasks?q.cfTasks.filter(function(t){return !t.carriedTo&&t.checked;}).length:0);},0);}
+function calcPts(qs){var t=0;qs.forEach(function(q){var d=q.tasks.filter(function(t){return !t.carriedTo&&t.checked;}).length+(q.cfTasks?q.cfTasks.filter(function(t){return !t.carriedTo&&t.checked;}).length:0);t+=d*q.pts;});return t;}
+function genSum(s){var p=[];s.quests.forEach(function(q){var d=q.tasks.filter(function(t){return t.checked;}).length+(q.cfTasks?q.cfTasks.filter(function(t){return t.checked;}).length:0);var tot=q.tasks.length+(q.cfTasks?q.cfTasks.length:0);if(d>0)p.push(q.title.replace(/Quest \d+: ?/,'')+': '+d+'/'+tot);});return p.join(' \u00b7 ')||'No tasks completed';}
+function getDateForDN(tn){var s=new Date(S.startDate+'T00:00:00'),c=0,d=new Date(s);for(var i=0;i<200;i++){if(d.getDay()!==0&&d.getDay()!==6){c++;if(c===tn)return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}d.setDate(d.getDate()+1);}return null;}
+function fmtDate(ds){var d=new Date(ds+'T12:00:00'),dy=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return dy[d.getDay()]+' '+mo[d.getMonth()]+' '+d.getDate();}
+
+// =============================================
+// RENDER
+// =============================================
+function render(){
+  var td=todayStr(),we=isWE(td),dn=getDN(td),wn=getWN(dn);
+  document.getElementById('dayBadge').textContent=we?'\u{1F3D6}\uFE0F Weekend':'Day '+dn+' of 90';
+  document.getElementById('tPts').textContent=S.points;
+  document.getElementById('tStr').textContent=S.streak;
+  var tt=cntT(S.quests),dd=cntD(S.quests),pct=tt>0?Math.round((dd/tt)*100):0;
+  document.getElementById('tCmp').textContent=pct+'%';
+  var op=Math.min(100,Math.round((dn/90)*100)),ci=2*Math.PI*20;
+  document.getElementById('pRing').style.strokeDashoffset=ci-(ci*op/100);
+  document.getElementById('pText').textContent=op+'%';
+  renderSide(dn,wn);
+  if(ui.viewDate){renderPrevDay(ui.viewDate);}
+  else if(we){renderWE();}
+  else{renderMain();}
+  restoreFocus();
+}
+
+function restoreFocus(){if(!ui.ai)return;var inf=ui.ai,sel=inf.f==='bf'?'.bfi':inf.f==='an'?'textarea[data-f="an"]':inf.f==='rf'?'textarea[data-f="rf"]':'[data-qi="'+inf.qi+'"][data-ti="'+inf.ti+'"]';var el=document.querySelector(sel);if(el){el.focus();if(typeof inf.cp==='number'&&el.setSelectionRange)el.setSelectionRange(inf.cp,inf.cp);}ui.ai=null;}
+
+function renderWE(){document.getElementById('main').innerHTML='<div class="we show"><div class="we-e">\u{1F3D6}\uFE0F</div><div class="we-t">It\'s the Weekend!</div><div class="we-m">Rest up. Your streak is safe \u2014 weekends don\'t count against you.</div></div>';}
+
+function renderSide(cdn,cwn){
+  var sb=document.getElementById('sidebar'),h='<div class="side-t">\u{1F5FA}\uFE0F Level Guide</div>';
+  // Day 0 section (March 30-31)
+  var d0open=ui.ow.has(-1);
+  h+='<div class="wb"><div class="wh done '+(d0open?'open':'')+'" onclick="toggleW(-1)"><span class="lb">D0</span><span>Setup: Mar 30\u201331</span><span class="ch">\u25BE</span></div><div class="wbd '+(d0open?'open':'')+'"><div class="wbi">';
+  ['2026-03-30','2026-03-31'].forEach(function(ds){
+    var log=S.dailyLog[ds],hl=!!log,it=ds===todayStr();
+    h+='<div class="dl '+(it?'today ':'')+(hl?'done ':'')+'" onclick="viewDay(\''+ds+'\')">';
+    h+='<div class="dla">'+fmtDate(ds)+'</div>';
+    if(hl)h+='<div class="dls">'+escH(log.summary)+' \u00b7 '+log.points+'pts</div>';
+    h+='</div>';
+  });
+  h+='</div></div></div>';
+  if(ui.ow.size===0)WGUIDE.forEach(function(wg,i){var wr=wg.w.split('\u2013').map(Number);if(cwn>=wr[0]&&cwn<=(wr[1]||wr[0]))ui.ow.add(i);});
+  WGUIDE.forEach(function(wg,idx){
+    var wr=wg.w.split('\u2013').map(Number),sw=wr[0],ew=wr[1]||wr[0];
+    var ic=cwn>=sw&&cwn<=ew,icomp=cwn>ew,isO=ui.ow.has(idx);
+    h+='<div class="wb"><div class="wh '+(ic?'act ':'')+(icomp?'done ':'')+(isO?'open':'')+'" onclick="toggleW('+idx+')"><span class="lb">Lv '+escH(wg.lv)+'</span><span>Wk '+escH(wg.w)+': '+escH(wg.nm)+'</span><span class="ch">\u25BE</span></div><div class="wbd '+(isO?'open':'')+'"><div class="wbi">';
+    for(var w=sw;w<=ew;w++)for(var d=1;d<=5;d++){
+      var adn=(w-1)*5+d,ds=getDateForDN(adn);if(!ds)continue;
+      var log=S.dailyLog[ds],it=ds===todayStr(),hl=!!log;
+      h+='<div class="dl '+(it?'today ':'')+(hl?'done ':'')+'" onclick="viewDay(\''+ds+'\')">';
+      h+='<div class="dla">Day '+adn+' \u00b7 '+fmtDate(ds)+'</div>';
+      if(it&&!isWE(ds))h+='<div class="dls" style="color:var(--yellow)">\u26A1 In progress...</div>';
+      else if(hl)h+='<div class="dls">'+escH(log.summary)+' \u00b7 '+log.points+'pts</div>';
+      h+='</div>';
+    }
+    h+='<div class="wgt">\u{1F4CB} '+escH(wg.d)+'</div></div></div></div>';
+  });
+  sb.innerHTML=h;
+}
+
+// View a previous day's detailed log
+function viewDay(ds){
+  if(ds===todayStr()){ui.viewDate=null;render();return;}
+  ui.viewDate=ds;
+  // If no log exists, auto-generate one from the schedule
+  if(!S.dailyLog[ds]){
+    var dn=getDN(ds),wn=getWN(dn);
+    // Special: March 30 is a Sunday (weekend), March 31 is pre-start
+    if(ds==='2026-03-30') wn='mar30';
+    if(ds==='2026-03-31') wn=0;
+    var quests=buildQuests(wn);
+    S.dailyLog[ds]={
+      points:0, completion:0, summary:'Not started', tasks:cntT(quests), done:0,
+      quests:quests, focusTheme:'', bossFight:'', bossFightDone:false, appNotes:'', reflections:'',
+    };
+    saveS();
+  }
+  render();
+}
+
+function renderPrevDay(ds){
+  var log=S.dailyLog[ds];if(!log){ui.viewDate=null;render();return;}
+  var m=document.getElementById('main'),h='';
+  var dn=getDN(ds);
+  if(ds==='2026-03-30'||ds==='2026-03-31') dn=0;
+
+  h+='<div class="view-banner"><span class="vb-title">\u{1F4C5} '+(dn===0?'Day 0':'Day '+dn)+' \u2014 '+fmtDate(ds)+'</span><button class="vb-back" onclick="ui.viewDate=null;render();">\u2190 Back to Today</button></div>';
+
+  // Stats bar
+  var tt=0,dd=0;
+  (log.quests||[]).forEach(function(q){
+    tt+=q.tasks.filter(function(t){return !t.carriedTo;}).length+(q.cfTasks?q.cfTasks.filter(function(t){return !t.carriedTo;}).length:0);
+    dd+=q.tasks.filter(function(t){return !t.carriedTo&&t.checked;}).length+(q.cfTasks?q.cfTasks.filter(function(t){return !t.carriedTo&&t.checked;}).length:0);
+  });
+  var pct=tt>0?Math.round((dd/tt)*100):0;
+  log.done=dd; log.tasks=tt; log.completion=pct; log.points=calcPts(log.quests||[]);
+
+  h+='<div class="prev-day-log"><h4>\u{1F4CA} Summary</h4><div class="pdl-stat"><span>\u2B50 <span class="pdl-v">'+log.points+'</span> pts</span><span>\u2705 <span class="pdl-v">'+dd+'/'+tt+'</span> ('+pct+'%)</span></div>';
+
+  // Detailed done / pending breakdown
+  var doneList='', pendingList='';
+  (log.quests||[]).forEach(function(q){
+    q.tasks.forEach(function(t){
+      if(t.carriedTo) return;
+      if(t.checked) doneList+='<div class="prev-task"><span class="ptc">\u2714</span> <strong>'+escH(q.title)+':</strong> '+escH(t.label)+'</div>';
+      else pendingList+='<div class="prev-task"><span class="ptx">\u2022</span> <strong>'+escH(q.title)+':</strong> '+escH(t.label)+'</div>';
+    });
+    (q.cfTasks||[]).forEach(function(t){
+      if(t.carriedTo) return;
+      if(t.checked) doneList+='<div class="prev-task"><span class="ptc">\u2714</span> <strong>'+escH(q.title)+' (from '+fmtDate(t.fromDate)+'):</strong> '+escH(t.label)+'</div>';
+      else pendingList+='<div class="prev-task"><span class="ptx">\u2022</span> <strong>'+escH(q.title)+' (from '+fmtDate(t.fromDate)+'):</strong> '+escH(t.label)+'</div>';
+    });
+  });
+  if(doneList){h+='<div class="prev-day-log"><h4>\u{1F4DD} Done Tasks</h4>'+doneList+'</div>';} else {h+='<div class="prev-day-log"><h4>\u{1F4DD} Done Tasks</h4><div class="prev-task" style="color:var(--t3)">No tasks completed yet.</div></div>';}
+  if(pendingList){h+='<div class="prev-day-log"><h4>\u{1F4DD} Pending Tasks</h4>'+pendingList+'</div>';} else {h+='<div class="prev-day-log"><h4>\u{1F4DD} Pending Tasks</h4><div class="prev-task" style="color:var(--t3)">All tasks are complete.</div></div>';}
+
+  h+='</div>';
+
+  h+='<div style="display:flex;gap:10px;align-items:flex-end;margin-top:12px;flex-wrap:wrap">';
+  h+='<div style="flex:1;min-width:220px"><label style="font-size:.8rem;color:var(--t2);display:block;margin-bottom:6px">Carry undone tasks to</label><input id="carryTarget" class="mi" type="date" value="'+escA(todayStr())+'" min="'+escA(S.startDate)+'" max="'+escA(getPlanEndDate())+'"></div>';
+  h+='<button class="eod-btn" onclick="saveDayLog(\''+escA(ds)+'\')">\u{1F4BE} Save Log for '+fmtDate(ds)+'</button>';
+  h+='<button class="eod-btn" style="background:linear-gradient(135deg,var(--blue),var(--purple))" onclick="resetDayLog(\''+escA(ds)+'\')">\u267B\uFE0F Reset Day</button>';
+  h+='<button class="eod-btn" style="background:linear-gradient(135deg,var(--pink),var(--red))" onclick="carrySelectedTasks(\''+escA(ds)+'\')">\u27A1\uFE0F Carry Selected Tasks</button>';
+  h+='<button class="eod-btn" style="background:linear-gradient(135deg,var(--orange),var(--yellow))" onclick="carryForwardTo(\''+escA(ds)+'\',document.getElementById(\'carryTarget\').value)">\u27A1\uFE0F Carry All Undone</button>';
+  h+='</div>';
+
+  // Interactive quest cards — checkable!
+  (log.quests||[]).forEach(function(q,qi){
+    var qd=q.tasks.filter(function(t){return t.checked;}).length;
+    var qt=q.tasks.length;
+    if(qt===0)return;
+    var qpct=qt>0?Math.round((qd/qt)*100):0;
+    h+='<div class="qc open" style="margin-top:10px"><div class="qh"><span class="qi">'+q.icon+'</span><span class="qt">'+escH(q.title)+'</span><span class="qp">'+qd+'/'+qt+'</span><div class="qpm"><div class="qpmf" style="width:'+qpct+'%"></div></div></div><div class="qb" style="max-height:2000px"><div class="qbi">';
+    q.tasks.forEach(function(t,ti){
+      var carryLabel=escA(t.type==='input'&&t.value?t.label+' '+t.value:t.label);
+      h+='<div class="ti '+(t.checked?'chkd':'')+'"><div class="tc '+(t.checked?'chk':'')+'" onclick="togLogTask(\''+escA(ds)+'\','+qi+','+ti+')"></div>';
+      if(!t.checked)h+='<input type="checkbox" class="carry-selector" data-src-cat="'+escA(q.id)+'" data-src-label="'+carryLabel+'" data-src-from="'+escA(ds)+'" onclick="event.stopPropagation()" style="margin-right:10px">';
+      if(t.type==='input'){
+        h+='<span class="tl" style="flex:0 0 auto;min-width:60px">'+escH(t.label)+'</span>';
+        h+='<input class="tif" value="'+escA(t.value||'')+'" placeholder="..." oninput="updLogVal(\''+escA(ds)+'\','+qi+','+ti+',this.value)">';
+      } else {
+        h+='<span class="tl">'+escH(t.label)+'</span>';
+      }
+      h+='</div>';
+    });
+    (q.cfTasks||[]).forEach(function(t,ci){
+      var carryLabel=escA(t.label);
+      h+='<div class="ti '+(t.checked?'chkd':'')+'"><div class="tc '+(t.checked?'chk':'')+'" onclick="togCF('+qi+','+ci+',event)"></div>';
+      if(!t.checked)h+='<input type="checkbox" class="carry-selector" data-src-cat="'+escA(q.id)+'" data-src-label="'+carryLabel+'" data-src-from="'+escA(t.fromDate||ds)+'" onclick="event.stopPropagation()" style="margin-right:10px">';
+      h+='<span class="tl">'+escH(t.label)+'</span><span class="cftag">from '+fmtDate(t.fromDate)+'</span>';
+      h+='</div>';
+    });
+    h+='</div></div></div>';
+  });
+
+  m.innerHTML=h;
+}
+
+function carrySelectedTasks(srcDs){
+  var targetDs=document.getElementById('carryTarget')?.value;
+  if(!targetDs){showToast('Select a target date');return;}
+  if(srcDs===targetDs){showToast('Select a different target date');return;}
+  var selections=document.querySelectorAll('.carry-selector:checked');
+  if(!selections.length){showToast('Select tasks to carry.');return;}
+  var selected=[];
+  selections.forEach(function(el){
+    selected.push({cat:el.dataset.srcCat,label:el.dataset.srcLabel,fromDate:el.dataset.srcFrom});
+  });
+  if(selected.length===0){showToast('Select tasks to carry.');return;}
+  var sourceLog=S.dailyLog[srcDs]||getOrCreateLog(srcDs);
+  var targetIsToday = targetDs===todayStr();
+  var targetLog = targetIsToday ? null : getOrCreateLog(targetDs);
+  var targetQuests = targetIsToday ? S.quests : targetLog.quests;
+  if(!targetQuests){showToast('Target day not ready');return;}
+  var count=0;
+  selected.forEach(function(item){
+    var tgt=targetQuests.find(function(q){return q.id===item.cat;});
+    if(!tgt) return;
+    tgt.cfTasks=tgt.cfTasks||[];
+    var exists=tgt.cfTasks.some(function(cf){return cf.label===item.label;});
+    if(exists) return;
+    tgt.cfTasks.push({id:'cf_'+Date.now()+'_'+count,label:item.label,checked:false,fromDate:item.fromDate});
+    count++;
+    // mark original source task as moved
+    if(sourceLog && sourceLog.quests){
+      var srcQ=sourceLog.quests.find(function(q){return q.id===item.cat;});
+      if(srcQ){
+        var candidates=srcQ.tasks.concat(srcQ.cfTasks||[]);
+        candidates.forEach(function(ts){
+          var tl=ts.type==='input'&&ts.value?ts.label+' '+ts.value:ts.label;
+          if(!ts.checked && !ts.carriedTo && tl===item.label){
+            ts.carriedTo=targetDs;
+          }
+        });
+      }
+    }
+  });
+  if(count===0){showToast('No new selected tasks were carried.');return;}
+  if(targetIsToday){S.points=calcPts(S.quests);} else {targetLog.points=calcPts(targetLog.quests);targetLog.summary=genSumFromQuests(targetLog.quests);}
+  saveS();
+  showToast(count+' selected task'+(count===1?'':'s')+' carried to '+fmtDate(targetDs));
+  if(targetIsToday||targetDs===ui.viewDate){ui.viewDate=null;}
+  render();
+}
+
+// Toggle a task in a saved/viewing day's log
+function togLogTask(ds,qi,ti){
+  var log=S.dailyLog[ds];if(!log||!log.quests)return;
+  var t=log.quests[qi].tasks[ti];
+  t.checked=!t.checked;
+  if(t.checked){cleanupFutureCarryForward(ds);} // remove invalid carried copies if task is now done
+  // Recalculate
+  var tt=0,dd=0;
+  log.quests.forEach(function(q){tt+=q.tasks.length+(q.cfTasks?q.cfTasks.length:0);dd+=q.tasks.filter(function(x){return x.checked;}).length+(q.cfTasks?q.cfTasks.filter(function(x){return x.checked;}).length:0);});
+  log.done=dd;log.tasks=tt;log.completion=tt>0?Math.round((dd/tt)*100):0;log.points=calcPts(log.quests);
+  log.summary=genSumFromQuests(log.quests);
+  saveS();render();
+}
+
+function cleanupFutureCarryForward(srcDs){
+  var src=S.dailyLog[srcDs];
+  if(!src||!src.quests)return;
+  var completed=[];
+  src.quests.forEach(function(q){
+    q.tasks.concat(q.cfTasks||[]).forEach(function(t){
+      if(t.checked){
+        completed.push({cat:q.id,label:t.type==='input'&&t.value?t.label+' '+t.value:t.label});
+      }
+    });
+  });
+  if(completed.length===0) return;
+
+  function removeFromQuest(q){
+    if(!q.cfTasks||!q.cfTasks.length) return false;
+    var before=q.cfTasks.length;
+    q.cfTasks=q.cfTasks.filter(function(cf){
+      return !(cf.fromDate===srcDs && completed.some(function(c){return c.cat===q.id && c.label===cf.label;}));
+    });
+    return q.cfTasks.length!==before;
+  }
+
+  Object.keys(S.dailyLog).forEach(function(ds){
+    if(ds<=srcDs) return;
+    var day=S.dailyLog[ds];
+    if(!day||!day.quests) return;
+    day.quests.forEach(removeFromQuest);
+  });
+  if(todayStr()>srcDs){
+    S.quests.forEach(removeFromQuest);
+  }
+}
+
+function updLogVal(ds,qi,ti,val){
+  var log=S.dailyLog[ds];if(!log||!log.quests)return;
+  log.quests[qi].tasks[ti].value=val;
+  saveS();
+}
+
+function genSumFromQuests(qs){
+  var p=[];qs.forEach(function(q){
+    var d=q.tasks.filter(function(t){return t.checked;}).length+(q.cfTasks?q.cfTasks.filter(function(t){return t.checked;}).length:0);
+    var tot=q.tasks.length+(q.cfTasks?q.cfTasks.length:0);
+    if(d>0)p.push(q.title.replace(/Quest \d+: ?/,'')+': '+d+'/'+tot);
+  });
+  return p.join(' \u00b7 ')||'No tasks completed';
+}
+
+// Save a specific day's log (updates summary in sidebar)
+function saveDayLog(ds){
+  var log=S.dailyLog[ds];if(!log)return;
+  var tt=0,dd=0;
+  (log.quests||[]).forEach(function(q){
+    tt+=q.tasks.length+(q.cfTasks?q.cfTasks.length:0);
+    dd+=q.tasks.filter(function(t){return t.checked;}).length+(q.cfTasks?q.cfTasks.filter(function(t){return t.checked;}).length:0);
+  });
+  log.done=dd;log.tasks=tt;log.completion=tt>0?Math.round((dd/tt)*100):0;
+  log.points=calcPts(log.quests||[]);
+  log.summary=genSumFromQuests(log.quests||[]);
+  cleanupFutureCarryForward(ds);
+  saveS();
+  
+  // Save to external logs folder if configured
+  if(S.logsFolder && window.electron){
+    var format = S.logFormat || 'md';
+    var content = formatLogData(log, ds, format);
+    var ext = format === 'md' ? 'md' : format === 'txt' ? 'txt' : 'json';
+    window.electron.saveDayLog(ds, { content: content, format: format, ext: ext }).then(result => {
+      if(result.success){
+        showToast('Log saved for '+fmtDate(ds)+' ('+log.points+' pts, '+dd+'/'+tt+') + external file');
+      } else {
+        showToast('Log saved locally, but external save failed: ' + (result.error || 'Unknown error'));
+      }
+    }).catch(err => {
+      showToast('Log saved locally, external save error');
+    });
+  } else {
+    showToast('Log saved for '+fmtDate(ds)+' ('+log.points+' pts, '+dd+'/'+tt+')');
+  }
+  
+  render();
+}
+
+function formatLogData(log, ds, format){
+  var dateStr = fmtDate(ds);
+  if(format === 'json'){
+    return JSON.stringify(log, null, 2);
+  } else if(format === 'txt'){
+    var txt = 'DAILY LOG: ' + dateStr + '\n';
+    txt += '=' .repeat(50) + '\n\n';
+    txt += 'SUMMARY: ' + log.summary + '\n';
+    txt += 'POINTS: ' + log.points + '\n';
+    txt += 'COMPLETION: ' + log.completion + '% (' + log.done + '/' + log.tasks + ' tasks)\n\n';
+    
+    if(log.focusTheme) txt += 'FOCUS THEME: ' + log.focusTheme + '\n\n';
+    if(log.bossFight) txt += 'BOSS FIGHT: ' + log.bossFight + '\n\n';
+    
+    txt += 'QUESTS:\n';
+    (log.quests || []).forEach(function(q, qi){
+      txt += '- ' + q.title + '\n';
+      q.tasks.forEach(function(t){
+        var taskText = (t.value || t.label || '(no description)').trim();
+        txt += '  ' + (t.checked ? '[X]' : '[ ]') + ' ' + taskText + '\n';
+      });
+      if(q.cfTasks && q.cfTasks.length > 0){
+        txt += '  (Carry-forward tasks)\n';
+        q.cfTasks.forEach(function(t){
+          var taskText = (t.value || t.label || '(no description)').trim();
+          txt += '  ' + (t.checked ? '[X]' : '[ ]') + ' ' + taskText + '\n';
+        });
+      }
+      txt += '\n';
+    });
+    
+    if(log.appNotes) txt += 'APPLICATION NOTES:\n' + log.appNotes + '\n\n';
+    if(log.reflections) txt += 'REFLECTIONS:\n' + log.reflections + '\n\n';
+    
+    return txt;
+  } else { // md
+    var md = '# Daily Log: ' + dateStr + '\n\n';
+    md += '## Summary\n' + log.summary + '\n\n';
+    md += '## Stats\n';
+    md += '- **Points:** ' + log.points + '\n';
+    md += '- **Completion:** ' + log.completion + '% (' + log.done + '/' + log.tasks + ' tasks)\n\n';
+    
+    if(log.focusTheme) md += '## Focus Theme\n' + log.focusTheme + '\n\n';
+    if(log.bossFight) md += '## Boss Fight\n' + log.bossFight + '\n\n';
+    
+    md += '## Quests\n';
+    (log.quests || []).forEach(function(q, qi){
+      md += '### ' + q.title + '\n';
+      md += '- points per task: ' + (q.pts || 'n/a') + '\n';
+      md += '- quest id: ' + (q.id || 'n/a') + '\n';
+      md += '\n';
+      md += '#### Tasks\n';
+      q.tasks.forEach(function(t){
+        var taskText = (t.value || t.label || '(no description)').trim();
+        md += '- ' + (t.checked ? '[x]' : '[ ]') + ' ' + taskText + '  \n';
+        if (t.type) md += '  - type: ' + t.type + '\n';
+        if (t.label) md += '  - label: ' + t.label + '\n';
+      });
+      if(q.cfTasks && q.cfTasks.length > 0){
+        md += '\n**Carry-forward tasks:**\n';
+        q.cfTasks.forEach(function(t){
+          var taskText = (t.value || t.label || '(no description)').trim();
+          md += '- ' + (t.checked ? '[x]' : '[ ]') + ' ' + taskText + '  \n';
+          if (t.type) md += '  - type: ' + t.type + '\n';
+          if (t.label) md += '  - label: ' + t.label + '\n';
+        });
+      }
+      md += '\n';
+    });
+    
+    if(log.appNotes) md += '## Application Notes\n' + log.appNotes + '\n\n';
+    if(log.reflections) md += '## Reflections\n' + log.reflections + '\n\n';
+    
+    return md;
+  }
+}
+
+function getOrCreateLog(ds){
+  if(!S.dailyLog[ds]){
+    var dn=getDN(ds), wn=getWN(dn);
+    if(ds==='2026-03-30') wn='mar30';
+    if(ds==='2026-03-31') wn=0;
+    var quests=buildQuests(wn);
+    S.dailyLog[ds]={
+      points:0, completion:0, summary:'Not started', tasks:cntT(quests), done:0,
+      quests:quests, focusTheme:'', bossFight:'', bossFightDone:false, appNotes:'', reflections:'',
+    };
+  }
+  return S.dailyLog[ds];
+}
+
+function getCarrySourceMin(){
+  // Allow manual selection of March 30 and March 31 as carry-source dates.
+  return '2026-03-30';
+}
+
+function getPlanEndDate(){
+  return getDateForDN(90) || todayStr();
+}
+
+function resetDayLog(ds){
+  var log=S.dailyLog[ds];
+  if(!log) return;
+  var focus=log.focusTheme, boss=log.bossFight, notes=log.appNotes, reflections=log.reflections;
+  var dn=getDN(ds), wn=getWN(dn);
+  if(ds==='2026-03-30') wn='mar30';
+  if(ds==='2026-03-31') wn=0;
+  var quests=buildQuests(wn);
+  log.quests=quests;
+  log.tasks=cntT(quests);
+  log.done=0;
+  log.completion=0;
+  log.points=0;
+  log.summary='Not started';
+  log.focusTheme=focus;
+  log.bossFight=boss;
+  log.bossFightDone=false;
+  log.appNotes=notes;
+  log.reflections=reflections;
+  saveS();
+  render();
+  showToast('Reset log for '+fmtDate(ds)+' and cleared undone tasks.');
+}
+
+function carryForwardTo(srcDs,targetDs){
+  if(!targetDs){showToast('Select a target date');return;}
+  if(srcDs===targetDs){showToast('Select a different target date');return;}
+  var src=S.dailyLog[srcDs] || getOrCreateLog(srcDs);
+  if(!src||!src.quests){showToast('Source log not found');return;}
+  var targetIsToday = targetDs===todayStr();
+  var targetLog = targetIsToday ? null : getOrCreateLog(targetDs);
+  var targetQuests = targetIsToday ? S.quests : targetLog.quests;
+  if(!targetQuests){showToast('Target day not ready');return;}
+  var count=0;
+  src.quests.forEach(function(q){
+    (q.tasks||[]).concat(q.cfTasks||[]).forEach(function(t){
+      if(t.checked||t.carriedTo) return;
+      var label=t.type==='input'&&t.value?t.label+' '+t.value:t.label;
+      var tgt=targetQuests.find(function(x){return x.id===q.id;});
+      if(tgt){
+        tgt.cfTasks=tgt.cfTasks||[];
+        var exists=tgt.cfTasks.some(function(cf){return cf.label===label;});
+        if(!exists){
+          tgt.cfTasks.push({id:'cf_'+Date.now()+'_'+count,label:label,checked:false,fromDate:srcDs});
+          count++;
+          t.carriedTo=targetDs;
+        }
+      }
+    });
+  });
+  if(count===0){showToast('No undone tasks to carry.');return;}
+  if(targetIsToday){S.points=calcPts(S.quests);} else {targetLog.points=calcPts(targetLog.quests);targetLog.summary=genSumFromQuests(targetLog.quests);}
+  saveS();
+  showToast(count+' undone task'+(count===1?'':'s')+' carried to '+fmtDate(targetDs));
+  if(targetIsToday||targetDs===ui.viewDate){ui.viewDate=null;}
+  render();
+}
+
+// Carry forward undone tasks from a specific day to today
+function carryFromSelectedDay(){
+  var src = document.getElementById('carrySource')?.value;
+  var target = document.getElementById('carryTarget')?.value;
+  if(!src){showToast('Select a source day');return;}
+  if(!target){showToast('Select a target day');return;}
+  carryForwardTo(src,target);
+}
+
+function carryForwardFrom(ds){
+  carryForwardTo(ds,todayStr());
+}
+
+function renderMain(){
+  var m=document.getElementById('main'),h='';
+  var wn=getWN(getDN(todayStr()));
+  var wkData=WEEKLY_TASKS[wn]||WEEKLY_TASKS[1];
+
+  // Notion links banner
+  h+='<div class="nb"><span style="font-weight:700;color:var(--purple)">📋 Notion</span><span style="margin-left:12px;color:var(--t2);font-size:.78rem">Local saved logs are used first; Notion links are for reference only.</span><a href="https://www.notion.so/333cc92a7b0b81869a90c8f71abda1df" target="_blank" style="color:var(--blue);font-size:.75rem">Jobs</a><a href="https://www.notion.so/333cc92a7b0b81218f96dad5ffabd468" target="_blank" style="color:var(--blue);font-size:.75rem">Quiz</a><a href="https://www.notion.so/333cc92a7b0b81caa902d4c55418d05d" target="_blank" style="color:var(--blue);font-size:.75rem">Freelance</a><a href="https://www.notion.so/333cc92a7b0b81b1852fe5ed2ed1bd5a" target="_blank" style="color:var(--blue);font-size:.75rem">Certs</a><a href="https://www.notion.so/333cc92a7b0b8119b808efb05a211b53" target="_blank" style="color:var(--blue);font-size:.75rem">Projects</a><a href="https://www.notion.so/333cc92a7b0b81aa9c21eab416d99633" target="_blank" style="color:var(--blue);font-size:.75rem">Network</a><a href="https://www.notion.so/333cc92a7b0b814b85f4dd0be258b01e" target="_blank" style="color:var(--blue);font-size:.75rem">Schedule</a></div>';
+
+  // Week label
+  h+='<div style="font-size:.8rem;color:var(--t3);margin-bottom:12px;font-weight:700">\u{1F4C5} '+escH(wkData.label)+' \u00b7 Day '+getDN(todayStr())+' of 90</div>';
+
+  // Carry-forward banner
+  var hasCF=false;
+  S.quests.forEach(function(q){if(q.cfTasks&&q.cfTasks.length>0)hasCF=true;});
+  if(hasCF){
+    h+='<div class="cf-banner"><h4>\u26A0\uFE0F Carried Forward from Yesterday</h4>';
+    S.quests.forEach(function(q){
+      (q.cfTasks||[]).forEach(function(t){
+        if(!t.checked)h+='<div class="cf-item">\u2022 '+q.icon+' '+escH(t.label)+' <span style="color:var(--t3);font-size:.7rem">(from '+fmtDate(t.fromDate)+')</span></div>';
+      });
+    });
+    h+='</div>';
+  }
+
+  h+='<div class="cf-banner"><h4>\u{1F4C6} Move selected undone tasks</h4><div class="cf-item">Choose a source day and a target day to move undone tasks manually.</div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">';
+  h+='<div style="flex:1;min-width:220px"><label style="font-size:.8rem;color:var(--t2);display:block;margin-bottom:6px">Source day</label><input id="carrySource" class="mi" type="date" min="'+escA(getCarrySourceMin())+'" max="'+escA(todayStr())+'" value="'+escA(todayStr())+'"></div>';
+  h+='<div style="flex:1;min-width:220px"><label style="font-size:.8rem;color:var(--t2);display:block;margin-bottom:6px">Target day</label><input id="carryTarget" class="mi" type="date" value="'+escA(todayStr())+'" min="'+escA(S.startDate)+'" max="'+escA(getPlanEndDate())+'"></div>';
+  h+='<button class="cf-btn" onclick="carrySelectedTasks(todayStr())">Carry selected tasks</button>';
+  h+='<button class="cf-btn" style="background:linear-gradient(135deg,var(--orange),var(--yellow))" onclick="carryFromSelectedDay()">Carry all undone from today</button></div></div>';
+
+  if(S.streak>0)h+='<div class="si"><span class="sl">\u{1F525} '+S.streak+'-day streak</span><span>Hit '+STREAK_THRESH+'+ pts to keep it!</span></div>';
+
+  // Focus
+  var fts=['Applications Blitz','Networking Day','Portfolio Deep Work','Certification Sprint'];
+  h+='<div class="focus"><h3>\u{1F3AF} Start Here</h3><div style="font-size:.85rem;color:var(--t2);margin-bottom:10px">Focus theme:</div><div class="fr">';
+  fts.forEach(function(t){h+='<div class="fc '+(S.focusTheme===t?'sel':'')+'" onclick="setFoc(this.dataset.t)" data-t="'+escA(t)+'">'+escH(t)+'</div>';});
+  h+='</div><div class="bfl">\u2694\uFE0F Boss Fight:</div><div style="display:flex;gap:8px;align-items:center"><input class="bfi" value="'+escA(S.bossFight)+'" placeholder="Hardest task today..." oninput="updBF(this.value)" onfocus="trkF(\'bf\')">';
+  if(S.bossFight)h+='<div class="tc '+(S.bossFightDone?'chk':'')+'" onclick="togBF()" style="flex-shrink:0"></div>';
+  h+='</div></div>';
+
+  // Scoreboard
+  var mx=120,bp=Math.min(100,(S.points/mx)*100);
+  h+='<div class="sb"><div><div class="sd">'+S.points+'</div><div class="st">/ '+mx+'</div></div><div class="sbc"><div class="sbr"><div class="sbrf" style="width:'+bp+'%"></div></div><div class="sms"><span class="sm '+(S.points>=60?'hit':'')+'">60\u{1F7E2}</span><span class="sm '+(S.points>=90?'hit':'')+'">90\u{1F7E0}</span><span class="sm '+(S.points>=120?'hit':'')+'">120\u{1F3C6}</span></div></div><div class="rts"><div class="rt '+(S.points>=60?'u r60':'')+'">\u2615 Break</div><div class="rt '+(S.points>=90?'u r90':'')+'">\u{1F3AC} Movie</div><div class="rt '+(S.points>=120?'u r120':'')+'">\u{1F3D6}\uFE0F Half-day</div></div></div>';
+
+  // Quest cards
+  S.quests.forEach(function(q,qi){
+    var qd=q.tasks.filter(function(t){return t.checked;}).length;
+    var cfd=(q.cfTasks||[]).filter(function(t){return t.checked;}).length;
+    var qt=q.tasks.length+(q.cfTasks?q.cfTasks.length:0);
+    var td=qd+cfd,qp=qt>0?Math.round((td/qt)*100):0,ad=td===qt&&qt>0;
+    var isO=ui.oq.has(q.id);
+    if(qt===0)return; // skip empty quests
+
+    h+='<div class="qc '+(ad?'comp ':'')+(isO?'open':'')+'" id="q-'+escA(q.id)+'"><div class="qh" onclick="togQ(\''+escA(q.id)+'\')"><span class="qi">'+q.icon+'</span><span class="qt">'+escH(q.title)+'</span><span class="qp">'+escH(q.pl)+'</span><div class="qpm"><div class="qpmf" style="width:'+qp+'%"></div></div><span class="qch">\u25BE</span></div><div class="qb"><div class="qbi">';
+
+    // Carry-forward tasks first
+    (q.cfTasks||[]).forEach(function(t,ci){
+      if(t.carriedTo) return;
+      h+='<div class="ti '+(t.checked?'chkd':'')+'"><div class="tc '+(t.checked?'chk':'')+'" onclick="togCF('+qi+','+ci+',event)"></div>';
+      if(!t.checked) h+='<input type="checkbox" class="carry-selector" data-src-cat="'+escA(q.id)+'" data-src-label="'+escA(t.label)+'" data-src-from="'+escA(t.fromDate||todayStr())+'" onclick="event.stopPropagation()" style="margin-right:10px">';
+      h+='<span class="tl">'+escH(t.label)+'</span><span class="cftag">CF from '+fmtDate(t.fromDate)+'</span></div>';
+    });
+
+    // Regular tasks
+    q.tasks.forEach(function(t,ti){
+      if(t.carriedTo) return;
+      h+='<div class="ti '+(t.checked?'chkd':'')+'"><div class="tc '+(t.checked?'chk':'')+'" onclick="togT('+qi+','+ti+',event)"></div>';
+      if(!t.checked) h+='<input type="checkbox" class="carry-selector" data-src-cat="'+escA(q.id)+'" data-src-label="'+escA(t.type==='input'&&t.value?t.label+' '+t.value:t.label)+'" data-src-from="'+escA(todayStr())+'" onclick="event.stopPropagation()" style="margin-right:10px">';
+      if(t.type==='input')h+='<span class="tl" style="flex:0 0 auto;min-width:60px">'+escH(t.label)+'</span><input class="tif" data-qi="'+qi+'" data-ti="'+ti+'" value="'+escA(t.value||'')+'" placeholder="..." oninput="updTV('+qi+','+ti+',this.value,this)" onfocus="trkF(\'t\','+qi+','+ti+')">';
+      else h+='<span class="tl">'+escH(t.label)+'</span>';
+      h+='<button class="rmb" onclick="rmT('+qi+','+ti+')">\u2715</button></div>';
+    });
+
+    h+='<button class="atb" onclick="addT('+qi+')">+ Add task</button>';
+    // Notion tracker link
+    var cat=CATS[q.id];
+    if(cat&&cat.link)h+='<a href="'+cat.link+'" target="_blank" style="display:block;margin-top:8px;font-size:.72rem;color:var(--blue);text-decoration:none;opacity:.7">\u{1F517} '+escH(cat.linkLabel)+' \u2192</a>';
+    if(q.id==='learning')h+='<a href="https://www.notion.so/333cc92a7b0b81218f96dad5ffabd468" target="_blank" style="display:block;margin-top:4px;font-size:.72rem;color:var(--blue);text-decoration:none;opacity:.7">\u{1F9E0} Claude Quiz Tracker \u2192</a>';
+    h+='</div></div></div>';
+  });
+
+  h+='<button class="atb" style="margin:14px 0;padding:10px 18px;font-size:.85rem" onclick="addQ()">+ Add quest</button>';
+
+  // Daily tracking
+  h+='<div class="trk"><h3>\u{1F4CC} Daily Tracking</h3><div class="trk-l">Application Notes</div><textarea data-f="an" placeholder="Date, company, role, status..." oninput="S.appNotes=this.value;saveS()" onfocus="trkF(\'an\')">'+escH(S.appNotes||'')+'</textarea><div class="trk-l">Reflections</div><textarea data-f="rf" placeholder="What went well? Improve tomorrow?" oninput="S.reflections=this.value;saveS()" onfocus="trkF(\'rf\')">'+escH(S.reflections||'')+'</textarea></div>';
+
+  // EOD Log button
+  h+='<div class="eod-panel"><h3>\u{1F4DD} End of Day</h3><div style="font-size:.8rem;color:var(--t2);margin-bottom:12px">Save a detailed log of today\'s progress. This log will be viewable by clicking any day in the sidebar.</div><button class="eod-btn" onclick="saveEODLog()">\u{1F4BE} Save Today\'s Log</button></div>';
+
+  m.innerHTML=h;
+}
+
+// =============================================
+// INTERACTIONS
+// =============================================
+function trkF(f,qi,ti){ui.ai=f==='t'?{f:'t',qi:qi,ti:ti}:{f:f};}
+function setFoc(t){S.focusTheme=S.focusTheme===t?'':t;saveS();render();}
+function updBF(v){S.bossFight=v;saveS();}
+function togBF(){S.bossFightDone=!S.bossFightDone;saveS();render();if(S.bossFightDone){var c=rnd(CELEBS.bossfight);showCeleb(c.e,c.t,c.m);}}
+function togQ(id){if(ui.oq.has(id))ui.oq.delete(id);else ui.oq.add(id);var el=document.getElementById('q-'+id);if(el)el.classList.toggle('open');}
+function toggleW(i){if(ui.ow.has(i))ui.ow.delete(i);else ui.ow.add(i);var dn=getDN(todayStr());renderSide(dn,getWN(dn));}
+function togT(qi,ti,ev){var t=S.quests[qi].tasks[ti];t.checked=!t.checked;S.points=calcPts(S.quests);saveS();if(t.checked)showPF(ev.clientX,ev.clientY,S.quests[qi].pts);var tt=cntT(S.quests),dd=cntD(S.quests),pct=tt>0?Math.round((dd/tt)*100):0;document.getElementById('tPts').textContent=S.points;document.getElementById('tCmp').textContent=pct+'%';var cb=ev.target;cb.classList.toggle('chk');var row=cb.closest('.ti');if(row)row.classList.toggle('chkd');chkMile();}
+function togCF(qi,ci,ev){var t=S.quests[qi].cfTasks[ci];t.checked=!t.checked;S.points=calcPts(S.quests);saveS();if(t.checked)showPF(ev.clientX,ev.clientY,S.quests[qi].pts);var tt=cntT(S.quests),dd=cntD(S.quests),pct=tt>0?Math.round((dd/tt)*100):0;document.getElementById('tPts').textContent=S.points;document.getElementById('tCmp').textContent=pct+'%';var cb=ev.target;cb.classList.toggle('chk');var row=cb.closest('.ti');if(row)row.classList.toggle('chkd');chkMile();}
+var _saveTimer=null;
+function updTV(qi,ti,v,el){S.quests[qi].tasks[ti].value=v;if(el)ui.ai={f:'t',qi:qi,ti:ti,cp:el.selectionStart};clearTimeout(_saveTimer);_saveTimer=setTimeout(saveS,500);}
+function addT(qi){var q=S.quests[qi];q.tasks.push({id:q.id+'_x'+Date.now(),label:'New task:',type:'input',checked:false,value:''});ui.oq.add(q.id);saveS();render();}
+function rmT(qi,ti){S.quests[qi].tasks.splice(ti,1);S.points=calcPts(S.quests);saveS();render();}
+function addQ(){var n=prompt('Quest name:');if(!n)return;var p=parseInt(prompt('Points per task:','5'))||5;var ic=prompt('Icon:','\u{1F3AF}')||'\u{1F3AF}';var id='c_'+Date.now();S.quests.push({id:id,icon:ic,title:n,pts:p,pl:'+'+p+' pts',tasks:[{id:'ct_'+Date.now(),label:'Task 1:',type:'input',checked:false,value:''}],cfTasks:[]});ui.oq.add(id);saveS();render();}
+
+// Save EOD log (to localStorage — viewable from sidebar)
+function saveEODLog(){
+  var td=todayStr(),dn=getDN(td);
+  var tt=cntT(S.quests),dd=cntD(S.quests);
+  S.dailyLog[td]={
+    points:S.points,
+    completion:tt>0?Math.round((dd/tt)*100):0,
+    summary:genSum(S),
+    tasks:tt, done:dd,
+    quests:JSON.parse(JSON.stringify(S.quests)),
+    focusTheme:S.focusTheme||'',
+    bossFight:S.bossFight||'',
+    bossFightDone:S.bossFightDone||false,
+    appNotes:S.appNotes||'',
+    reflections:S.reflections||'',
+  };
+  saveS();
+  saveDayLog(td); // also persist to selected folder
+  showToast('Day '+dn+' log saved! ('+S.points+' pts, '+dd+'/'+tt+' tasks)');
+  render(); // refresh sidebar to show updated log
+}
+
+// =============================================
+// MILESTONES & CELEBRATIONS
+// =============================================
+function chkMile(){
+  var tt=cntT(S.quests),dd=cntD(S.quests),p=tt>0?dd/tt:0;
+  if(p>=.25&&!S.miles.quarter){S.miles.quarter=true;saveS();var c=rnd(CELEBS.quarter);setTimeout(function(){showCeleb(c.e,c.t,c.m);},400);}
+  if(S.points>=60&&!S.miles.sixty){S.miles.sixty=true;saveS();var c2=rnd(CELEBS.sixty);setTimeout(function(){showCeleb(c2.e,c2.t,c2.m);},400);}
+  if(S.points>=90&&!S.miles.ninety){S.miles.ninety=true;saveS();var c3=rnd(CELEBS.ninety);setTimeout(function(){showCeleb(c3.e,c3.t,c3.m);},400);}
+  if(S.points>=120&&!S.miles.onetwenty){S.miles.onetwenty=true;saveS();var c4=rnd(CELEBS.onetwenty);setTimeout(function(){showCeleb(c4.e,c4.t,c4.m);confetti();},400);}
+  if(p>=1&&dd>0&&!S.miles.allDone){S.miles.allDone=true;saveS();var c5=rnd(CELEBS.allDone);setTimeout(function(){showCeleb(c5.e,c5.t,c5.m);confetti();},600);}
+}
+function showCeleb(e,t,m){document.getElementById('cE').textContent=e;document.getElementById('cT').textContent=t;document.getElementById('cM').textContent=m;document.getElementById('celeb').classList.add('show');}
+function closeCeleb(){document.getElementById('celeb').classList.remove('show');}
+function showPF(x,y,p){var e=document.createElement('div');e.className='pf';e.textContent='+'+p;e.style.left=x+'px';e.style.top=y+'px';e.style.color='var(--yellow)';document.body.appendChild(e);setTimeout(function(){e.remove();},1300);}
+function confetti(){var cs=['#ff6e96','#ff9e64','#ffd866','#a9dc76','#78dce8','#ab9df2'];var os=document.getElementById('cf-st');if(os)os.remove();var rot=360+Math.random()*720,st=document.createElement('style');st.id='cf-st';st.textContent='@keyframes cfFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate('+rot+'deg);opacity:0}}';document.head.appendChild(st);for(var i=0;i<60;i++){var pc=document.createElement('div');pc.className='confetti';pc.style.left=Math.random()*100+'vw';pc.style.top='-10px';pc.style.background=cs[Math.floor(Math.random()*cs.length)];pc.style.borderRadius=Math.random()>.5?'50%':'2px';pc.style.width=(6+Math.random()*8)+'px';pc.style.height=(6+Math.random()*8)+'px';pc.style.opacity='1';pc.style.animation='cfFall '+(2+Math.random()*2)+'s ease '+(Math.random()*.5)+'s forwards';document.body.appendChild(pc);(function(p){setTimeout(function(){p.remove();},4500);})(pc);}}
+
+// Notion sync managed via Claude chat (Option 1)
+
+// =============================================
+// SETTINGS
+// =============================================
+function openSet(){
+  document.getElementById('sDate').value = S.startDate || START_DATE;
+  document.getElementById('logsFolder').value = S.logsFolder || '';
+  document.getElementById('logFormat').value = S.logFormat || 'md';
+  document.getElementById('setModal').classList.add('show');
+  refreshLogFiles();
+}
+
+function closeSet(){
+  document.getElementById('setModal').classList.remove('show');
+}
+
+function saveSet(){
+  S.startDate = document.getElementById('sDate').value || START_DATE;
+  S.logsFolder = document.getElementById('logsFolder').value;
+  S.logFormat = document.getElementById('logFormat').value;
+  saveS();
+  closeSet();
+  render();
+  showToast('Saved!');
+}
+
+async function selectLogsFolder(){
+  try {
+    const result = await window.electron.selectLogsFolder();
+    if (result && result.path) {
+      document.getElementById('logsFolder').value = result.path;
+      S.logsFolder = result.path;
+      saveS();
+      await window.electron.setLogsFolder(result.path);
+      showToast('Logs folder selected!');
+      refreshLogFiles();
+    }
+  } catch (err) {
+    showToast('Error selecting folder');
+  }
+}
+
+async function refreshLogFiles(){
+  const listEl = document.getElementById('logFilesList');
+  if (!listEl) return; // Element not found
+  
+  if (!window.electron || !S || !S.logsFolder) {
+    listEl.innerHTML = '<em>No folder selected.</em>';
+    return;
+  }
+  
+  try {
+    const files = await window.electron.listDayLogs();
+    if (files && files.length > 0) {
+      listEl.innerHTML = files.map(f => `<div style="padding:2px 0;border-bottom:1px solid rgba(0,0,0,.1);">${f}</div>`).join('');
+    } else {
+      listEl.innerHTML = '<em>No log files found in selected folder.</em>';
+    }
+  } catch (err) {
+    listEl.innerHTML = '<em>Error loading files.</em>';
+  }
+}
+function exportData(){var b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='navvus-v4-'+todayStr()+'.json';a.click();URL.revokeObjectURL(u);showToast('Exported!');}
+function importData(){var inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var im=JSON.parse(ev.target.result);if(!im.quests){alert('Invalid.');return;}if(!confirm('Replace all data?'))return;S=im;saveS();render();showToast('Imported!');}catch(er){alert('Error: '+er.message);}};r.readAsText(f);};inp.click();}
+function resetAll(){
+  if(!confirm('Delete ALL data?'))return;
+  if(!confirm('Really?'))return;
+  
+  if (window.navvuStorage) {
+    window.navvuStorage.removeItem('navvus-v4').catch(function(err) {
+      console.error('Storage clear failed:', err);
+    });
+  } else {
+    localStorage.removeItem('navvus-v4');
+  }
+  
+  S=defS();
+  ui.oq.clear();
+  ui.ow.clear();
+  saveS();
+  closeSet();
+  render();
+  showToast('Reset.');
+}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function escA(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// =============================================
+// INIT
+// =============================================
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCeleb();closeSet();}});
+document.getElementById('setBtn').onclick=openSet;
+document.getElementById('rstBtn').onclick=function(){if(confirm('Reset today?')){S.quests.forEach(function(q){q.tasks.forEach(function(t){t.checked=false;});(q.cfTasks||[]).forEach(function(t){t.checked=false;});});S.points=0;S.bossFightDone=false;S.miles=defMile();saveS();render();showToast('Day reset!');}};
+
+// Initialize app (waits for storage to be ready)
+initApp().then(function() {
+  if(ui.oq.size===0&&S.quests[0]){
+    ui.oq.add(S.quests[0].id);
+    var fe=document.getElementById('q-'+S.quests[0].id);
+    if(fe)fe.classList.add('open');
+  }
+  ui.ow.add(-1); // Show D0 section by default
+}).catch(function(err) {
+  console.error('Failed to initialize app:', err);
+  // Fallback: still try to render
+  S = defS();
+  render();
+});
+</script>
+</body>
+</html>
