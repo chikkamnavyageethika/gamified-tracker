@@ -153,7 +153,7 @@ npm start
 Check if the folder exists:
 
 ```bash
-ls ~/navvu-logs/
+ls ~/manually selected logs directory/
 ```
 
 ---
