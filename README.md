@@ -2,6 +2,22 @@
 
 Desktop productivity tracker built with Electron for a 90-day gamified workflow.
 
+A standalone macOS desktop app for 90-day task tracking with local file-based storage.
+
+**Original:** Single-file HTML/CSS/JavaScript app  
+**This version:** Electron-based desktop application for macOS
+
+---
+
+## Features
+
+✅ **Standalone Desktop App** — No browser required  
+✅ **Local File Storage** — Your data lives in `~/navvu-logs/` (you control it)  
+✅ **Same UI & Functionality** — Identical to the web version  
+✅ **Daily Logs** — Automatic snapshots of daily progress  
+✅ **Easy Export/Import** — Backup or migrate your data  
+✅ **Zero Cloud** — 100% local, zero tracking  
+
 ## What This Repo Contains
 
 - Electron main process: main.js
