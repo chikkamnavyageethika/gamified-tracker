@@ -12,7 +12,7 @@ A standalone macOS desktop app for 90-day task tracking with local file-based st
 ## Features
 
 ✅ **Standalone Desktop App** — No browser required  
-✅ **Local File Storage** — Your data lives in `~/navvu-logs/` (you control it)  
+✅ **Local File Storage** — Your data lives in `Logs_directory` (you control it)  
 ✅ **Same UI & Functionality** — Identical to the web version  
 ✅ **Daily Logs** — Automatic snapshots of daily progress  
 ✅ **Easy Export/Import** — Backup or migrate your data  
