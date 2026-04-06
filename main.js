@@ -39,7 +39,9 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
-  mainWindow.webContents.openDevTools(); // Remove in production
+  if (!app.isPackaged) {
+    mainWindow.webContents.openDevTools();
+  }
 }
 
 // Initialize app
@@ -203,8 +205,4 @@ ipcMain.handle('export-state', async (event, filePath, state) => {
   } catch (err) {
     return { success: false, error: err.message };
   }
-});
-
-ipcMain.on('state-for-export', (event, filePath, state) => {
-  ipcMain.emit('export-state', filePath, state);
 });

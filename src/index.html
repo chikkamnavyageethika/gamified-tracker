@@ -675,25 +675,6 @@ function defS(){
 
 function todayStr(){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Vancouver',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
 
-function loadS(){
-  try{
-    var sv=localStorage.getItem('gamified-tracker-v1');
-    if(sv){
-      var s=JSON.parse(sv);
-      if(!s.quests||!Array.isArray(s.quests)||!s.today||!s.startDate){console.warn('Corrupted state');return defS();}
-      if(!s.miles)s.miles=defMile();
-      if(!('allDone' in s.miles))s.miles.allDone=false;
-      if(!s.dailyLog)s.dailyLog={};
-      if(typeof s.points!=='number')s.points=0;
-      if(typeof s.streak!=='number')s.streak=0;
-      var td=todayStr();
-      if(s.today!==td)return newDay(s,td);
-      return s;
-    }
-  }catch(e){console.error('State load failed:',e);}
-  return defS();
-}
-
 function saveS(){
   var stateStr = JSON.stringify(S);
   if (window.gamifiedTrackerStorage) {

@@ -13,6 +13,16 @@ electron-bin/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
+
+# Optional local IDE/editor settings
+.idea/
+.vscode/
+
+# Electron cache and temp
+.electron/
+*.tmp
+*.temp
 
 # macOS
 .DS_Store

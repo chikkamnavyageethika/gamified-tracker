@@ -9,7 +9,7 @@ const IS_ELECTRON = typeof window !== 'undefined' && window.electron;
 class StorageAdapter {
   constructor() {
     this.logsFolder = null;
-    this.stateFile = 'app-state.json';
+    this.stateFile = 'app-state';
     this.initialized = false;
     
     // Create a promise that resolves when storage is ready
@@ -76,8 +76,12 @@ class StorageAdapter {
     }
 
     try {
-        if (key === 'gamified-tracker-v1') {
-        const data = await window.electron.loadDayLog(this.stateFile);
+      if (key === 'gamified-tracker-v1') {
+        // Primary file: app-state.json. Fallback supports older app-state.json.json naming.
+        let data = await window.electron.loadDayLog(this.stateFile);
+        if (!data) {
+          data = await window.electron.loadDayLog('app-state.json');
+        }
         return data ? JSON.stringify(data) : localStorage.getItem(key);
       }
     } catch (err) {
